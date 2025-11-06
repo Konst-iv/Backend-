@@ -1,18 +1,23 @@
 <?php
 
-namespace App\Controller;   
-use App\Service\BookingService;
+namespace App\Controller;
 
-class BookingController
+use App\Service\BookingService;
+use App\Service\UserService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Routing\Annotation\Route;
+
+class BookingController extends AbstractController
 {
-    private BookingService $bookingService;
-    
-    public function __construct(BookingService $bookingService)
-    {
-        $this->bookingService = $bookingService;
-    }
-    
-    public function getAvailableHouses(): string
+    public function __construct(
+        private BookingService $bookingService,
+        private UserService $userService
+    ) {}
+
+    #[Route('/api/houses/available', name: 'available_houses', methods: ['GET'])]
+    public function getAvailableHouses(): JsonResponse
     {
         try {
             $houses = $this->bookingService->getAvailableHouses();
@@ -20,97 +25,133 @@ class BookingController
             $result = [];
             foreach ($houses as $house) {
                 $result[] = [
-                    'id' => $house->id,
-                    'name' => $house->name,
-                    'beds' => $house->beds,
-                    'amenities' => $house->amenities,
-                    'distanceToSea' => $house->distanceToSea
+                    'id' => $house->getId(),
+                    'name' => $house->getName(),
+                    'beds' => $house->getBeds(),
+                    'amenities' => $house->getAmenities(),
+                    'distanceToSea' => $house->getDistanceToSea(),
+                    'pricePerNight' => $house->getPricePerNight(),
+                    'isAvailable' => $house->isAvailable()
                 ];
             }
             
-            header('Content-Type: application/json');
-            return json_encode(['success' => true, 'data' => $result]);
+            return $this->json(['success' => true, 'data' => $result]);
             
         } catch (\Exception $e) {
-            header('Content-Type: application/json');
-            http_response_code(500);
-            return json_encode(['success' => false, 'error' => $e->getMessage()]);
+            return $this->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
     
-    public function createBooking(): string
+    #[Route('/api/bookings', name: 'create_booking', methods: ['POST'])]
+    public function createBooking(Request $request): JsonResponse
     {
         try {
-            // Получаем данные из POST запроса
-            $input = json_decode(file_get_contents('php://input'), true);
-            
-            if (!isset($input['phone']) || !isset($input['houseId']) || !isset($input['comment'])) {
-                http_response_code(400);
-                return json_encode(['success' => false, 'error' => 'Missing required fields']);
+            $data = json_decode($request->getContent(), true);
+
+            $requiredFields = ['userId', 'houseId', 'comment', 'checkIn', 'checkOut'];
+            foreach ($requiredFields as $field) {
+                if (!isset($data[$field])) {
+                    return $this->json([
+                        'success' => false,
+                        'error' => "Missing required field: $field"
+                    ], 400);
+                }
             }
-            
+
+            // Находим пользователя
+            $user = $this->userService->getUserById($data['userId']);
+            if (!$user) {
+                return $this->json([
+                    'success' => false,
+                    'error' => 'User not found'
+                ], 404);
+            }
+
+            // Создаем бронирование
             $booking = $this->bookingService->createBooking(
-                $input['phone'],
-                (int)$input['houseId'],
-                $input['comment']
+                $user,
+                (int)$data['houseId'],
+                $data['comment'],
+                new \DateTime($data['checkIn']),
+                new \DateTime($data['checkOut'])
             );
-            
-            header('Content-Type: application/json');
-            return json_encode([
-                'success' => true, 
+
+            return $this->json([
+                'success' => true,
                 'data' => [
-                    'id' => $booking->id,
-                    'phone' => $booking->phone,
-                    'houseId' => $booking->houseId,
-                    'comment' => $booking->comment,
-                    'createdAt' => $booking->createdAt
+                    'id' => $booking->getId(),
+                    'user' => [
+                        'id' => $user->getId(),
+                        'name' => $user->getName(),
+                        'email' => $user->getEmail()
+                    ],
+                    'house' => [
+                        'id' => $booking->getHouse()->getId(),
+                        'name' => $booking->getHouse()->getName()
+                    ],
+                    'comment' => $booking->getComment(),
+                    'checkIn' => $booking->getCheckIn()->format('Y-m-d'),
+                    'checkOut' => $booking->getCheckOut()->format('Y-m-d'),
+                    'status' => $booking->getStatus(),
+                    'createdAt' => $booking->getCreatedAt()->format('Y-m-d H:i:s')
                 ]
-            ]);
-            
+            ], 201);
+
         } catch (\InvalidArgumentException $e) {
-            http_response_code(400);
-            return json_encode(['success' => false, 'error' => $e->getMessage()]);
+            return $this->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 400);
         } catch (\Exception $e) {
-            http_response_code(500);
-            return json_encode(['success' => false, 'error' => $e->getMessage()]);
+            return $this->json([
+                'success' => false,
+                'error' => 'Internal server error: ' . $e->getMessage()
+            ], 500);
         }
     }
     
-    public function updateBooking(): string
+    #[Route('/api/bookings', name: 'update_booking', methods: ['PUT'])]
+    public function updateBooking(Request $request): JsonResponse
     {
         try {
-            $input = json_decode(file_get_contents('php://input'), true);
+            $data = json_decode($request->getContent(), true);
             
-            if (!isset($input['id']) || !isset($input['comment'])) {
-                http_response_code(400);
-                return json_encode(['success' => false, 'error' => 'Missing required fields']);
+            if (!isset($data['id']) || !isset($data['comment'])) {
+                return $this->json([
+                    'success' => false,
+                    'error' => 'Missing required fields: id, comment'
+                ], 400);
             }
             
             $booking = $this->bookingService->updateBookingComment(
-                (int)$input['id'],
-                $input['comment']
+                (int)$data['id'],
+                $data['comment']
             );
             
             if (!$booking) {
-                http_response_code(404);
-                return json_encode(['success' => false, 'error' => 'Booking not found']);
+                return $this->json([
+                    'success' => false,
+                    'error' => 'Booking not found'
+                ], 404);
             }
             
-            header('Content-Type: application/json');
-            return json_encode([
+            return $this->json([
                 'success' => true, 
                 'data' => [
-                    'id' => $booking->id,
-                    'phone' => $booking->phone,
-                    'houseId' => $booking->houseId,
-                    'comment' => $booking->comment,
-                    'updatedAt' => $booking->updatedAt
+                    'id' => $booking->getId(),
+                    'comment' => $booking->getComment(),
+                    'updatedAt' => $booking->getUpdatedAt()->format('Y-m-d H:i:s')
                 ]
             ]);
             
         } catch (\Exception $e) {
-            http_response_code(500);
-            return json_encode(['success' => false, 'error' => $e->getMessage()]);
+            return $this->json([
+                'success' => false,
+                'error' => $e->getMessage()
+            ], 500);
         }
     }
 }

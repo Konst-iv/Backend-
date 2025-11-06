@@ -1,62 +1,78 @@
 <?php
 
-
-namespace App\Service;  
+namespace App\Service;
 
 use App\Entity\Booking;
+use App\Entity\User;
+use App\Entity\House;
 use App\Repository\BookingRepository;
 use App\Repository\HouseRepository;
+use Doctrine\ORM\EntityManagerInterface;
 
-class BookingService{
-    private BookingRepository $bookingRepository;
-    private HouseRepository $houseRepository;
+class BookingService
+{
+    public function __construct(
+        private BookingRepository $bookingRepository,
+        private HouseRepository $houseRepository,
+        private EntityManagerInterface $entityManager
+    ) {}
 
-    public function __construct(BookingRepository $bookingRepo, HouseRepository $houseRepo)
+    public function getAvailableHouses(): array
     {
-        $this->bookingRepository = $bookingRepo;
-        $this->houseRepository = $houseRepo;
+        return $this->houseRepository->findBy(['isAvailable' => true]);
     }
 
-    public function getAvailableHouses (): array{
-        return $this->houseRepository->findAvailable();    
-    }
-    public function createBooking(string $phone, int $id, string $comment):?Booking{
-        $house = $this->houseRepository->findById($id);
-        if(!$house){
-            throw new \InvalidArgumentException("House with ID $id not found");
+    public function createBooking(User $user, int $houseId, string $comment, \DateTimeInterface $checkIn, \DateTimeInterface $checkOut): Booking
+    {
+        // Находим дом
+        $house = $this->houseRepository->find($houseId);
+        
+        if (!$house) {
+            throw new \InvalidArgumentException("House with ID $houseId not found");
         }
 
-        if (!$house->isAvailable) {
-            throw new \InvalidArgumentException("House with ID $id is not available");
+        if (!$house->isAvailable()) {
+            throw new \InvalidArgumentException("House with ID $houseId is not available");
         }
 
-        $booking = new Booking(
-        $this->bookingRepository->getNextId(),
-            $phone,
-            $id,
-            $comment,
-            date('Y-m-d H:i:s')
-        );
-        $this->bookingRepository->save($booking);
+        if ($checkIn >= $checkOut) {
+            throw new \InvalidArgumentException("Check-in date must be before check-out date");
+        }
+
+        // Создаем бронирование
+        $booking = new Booking();
+        $booking->setCustomer($user);
+        $booking->setHouse($house);
+        $booking->setComment($comment);
+        $booking->setCheckIn($checkIn);
+        $booking->setCheckOut($checkOut);
+        $booking->setStatus('confirmed');
+
+        // Сохраняем в базу
+        $this->entityManager->persist($booking);
+        $this->entityManager->flush();
+
         return $booking;
-    
     }
 
-     public function updateBookingComment(int $bookingId, string $newComment): ?Booking
+    public function updateBookingComment(int $bookingId, string $newComment): ?Booking
     {
-        $booking = $this->bookingRepository->findById($bookingId);
+        $booking = $this->bookingRepository->find($bookingId);
+        
         if (!$booking) {
             return null;
         }
         
-        $booking->comment = $newComment;
-        $booking->updatedAt = date('Y-m-d H:i:s');
+        $booking->setComment($newComment);
+        $booking->setUpdatedAt(new \DateTimeImmutable());
         
-        if ($this->bookingRepository->update($booking)) {
-            return $booking;
-        }
+        $this->entityManager->flush();
         
-        return null;
+        return $booking;
     }
-    
+
+    public function getUserBookings(User $user): array
+    {
+        return $this->bookingRepository->findBy(['customer' => $user]);
+    }
 }
