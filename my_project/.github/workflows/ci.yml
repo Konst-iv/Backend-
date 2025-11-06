@@ -11,6 +11,10 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
     
+    defaults:
+      run:
+        working-directory: ./my_project
+    
     services:
       postgres:
         image: postgres:16
@@ -50,7 +54,6 @@ jobs:
 
     - name: Add test houses data
       run: |
-        # Временное решение - добавим данные через SQL
         php bin/console doctrine:query:sql "
         INSERT INTO houses (name, beds, amenities, distance_to_sea, is_available, price_per_night) VALUES 
         ('Домик у моря', 2, 'санузел, душевая кабина', 50, true, 2500.00),
