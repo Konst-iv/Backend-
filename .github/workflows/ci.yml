@@ -41,10 +41,6 @@ jobs:
       run: composer install --prefer-dist --no-progress --no-interaction
       working-directory: my_project
 
-    - name: Install Doctrine
-      run: composer require symfony/orm-pack doctrine/doctrine-migrations-bundle --no-progress --no-interaction
-      working-directory: my_project
-
     - name: Setup test environment
       run: |
         echo "APP_ENV=test" > .env
@@ -60,9 +56,9 @@ jobs:
         PGPASSWORD=test_password psql -h localhost -U test_user -d postgres -c "CREATE DATABASE test_db_test;" 2>/dev/null || true
       working-directory: my_project
 
-    - name: Run database migrations
+    - name: Create database schema
       run: |
-        php bin/console doctrine:migrations:migrate --env=test -n --allow-no-migration
+        php bin/console doctrine:schema:create --env=test -n
       working-directory: my_project
 
     - name: Add test houses data
