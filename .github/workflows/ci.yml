@@ -53,8 +53,7 @@ jobs:
 
     - name: Create both test databases
       run: |
-        PGPASSWORD=test_password psql -h localhost -U test_user -d postgres -c "CREATE DATABASE test_db_test;"
-        PGPASSWORD=test_password psql -h localhost -U test_user -d postgres -c "CREATE DATABASE test_db;"
+        PGPASSWORD=test_password psql -h localhost -U test_user -d postgres -c "CREATE DATABASE test_db_test;" 2>/dev/null || true
       working-directory: my_project
 
     - name: Run database migrations
