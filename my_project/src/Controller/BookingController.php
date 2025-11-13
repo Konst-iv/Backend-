@@ -61,7 +61,6 @@ class BookingController extends AbstractController
                 }
             }
 
-            // Находим пользователя
             $user = $this->userService->getUserById($data['userId']);
             if (!$user) {
                 return $this->json([
@@ -70,7 +69,6 @@ class BookingController extends AbstractController
                 ], 404);
             }
 
-            // Создаем бронирование
             $booking = $this->bookingService->createBooking(
                 $user,
                 (int)$data['houseId'],
