@@ -41,24 +41,8 @@ jobs:
       run: composer install --prefer-dist --no-progress --no-interaction
       working-directory: my_project
 
-    - name: Setup test environment
-      run: |
-        if [ ! -f .env.test ]; then
-          cat > .env.test << 'EOF'
-          # Test environment configuration
-          APP_ENV=test
-          APP_SECRET=test_secret_key_for_testing_only
-          APP_DEBUG=true
-          
-          # Database Configuration for GitHub Actions
-          DATABASE_URL="postgresql://test_user:test_password@localhost:5432/test_db?serverVersion=16&charset=utf8"
-          
-          # Disable any external services for tests
-          MAILER_DSN=null://null
-          MESSENGER_TRANSPORT_DSN=doctrine://default
-          EOF
-        fi
-        cp .env.test .env
+    - name: Copy test environment
+      run: cp .env.test .env
       working-directory: my_project
 
     - name: Run database migrations
