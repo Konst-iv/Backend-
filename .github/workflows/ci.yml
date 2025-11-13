@@ -1,0 +1,74 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ dz_3 ]
+  pull_request:
+    branches: [ dz_3 ]
+
+jobs:
+  tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: test_user  
+          POSTGRES_PASSWORD: test_password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_pgsql
+        coverage: none
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
+      working-directory: ./Backend-/my_project
+
+    - name: Copy test environment
+      run: cp .env.test .env
+      working-directory: ./Backend-/my_project
+
+    - name: Run database migrations
+      run: |
+        php bin/console doctrine:database:create --env=test
+        php bin/console doctrine:migrations:migrate --env=test -n
+      working-directory: ./Backend-/my_project
+
+    - name: Add test houses data
+      run: |
+        php bin/console doctrine:query:sql "
+        INSERT INTO houses (name, beds, amenities, distance_to_sea, is_available, price_per_night) VALUES 
+        ('Домик у моря', 2, 'санузел, душевая кабина', 50, true, 2500.00),
+        ('Лесной домик', 4, 'никаких', 300, true, 1800.00),
+        ('Эконом вариант', 2, 'санузел', 100, true, 1200.00)
+        " --env=test
+      working-directory: ./Backend-/my_project
+
+    - name: Run unit tests
+      run: ./vendor/bin/phpunit --testsuite=unit
+      working-directory: ./Backend-/my_project
+
+    - name: Run integration tests  
+      run: ./vendor/bin/phpunit --testsuite=integration
+      working-directory: ./Backend-/my_project
+
+    - name: Run all tests
+      run: ./vendor/bin/phpunit --testsuite=all
+      working-directory: ./Backend-/my_project
