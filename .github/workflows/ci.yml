@@ -39,17 +39,17 @@ jobs:
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-interaction
-      working-directory: ./Backend-/my_project
+      working-directory: ./my_project
 
     - name: Copy test environment
       run: cp .env.test .env
-      working-directory: ./Backend-/my_project
+      working-directory: ./my_project
 
     - name: Run database migrations
       run: |
         php bin/console doctrine:database:create --env=test
         php bin/console doctrine:migrations:migrate --env=test -n
-      working-directory: ./Backend-/my_project
+      working-directory: ./my_project
 
     - name: Add test houses data
       run: |
@@ -59,16 +59,16 @@ jobs:
         ('Лесной домик', 4, 'никаких', 300, true, 1800.00),
         ('Эконом вариант', 2, 'санузел', 100, true, 1200.00)
         " --env=test
-      working-directory: ./Backend-/my_project
+      working-directory: ./my_project
 
     - name: Run unit tests
       run: ./vendor/bin/phpunit --testsuite=unit
-      working-directory: ./Backend-/my_project
+      working-directory: ./my_project
 
     - name: Run integration tests  
       run: ./vendor/bin/phpunit --testsuite=integration
-      working-directory: ./Backend-/my_project
+      working-directory: ./my_project
 
     - name: Run all tests
       run: ./vendor/bin/phpunit --testsuite=all
-      working-directory: ./Backend-/my_project
+      working-directory: ./my_project
