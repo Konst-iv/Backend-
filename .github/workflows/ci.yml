@@ -51,8 +51,10 @@ jobs:
         echo "MESSENGER_TRANSPORT_DSN=doctrine://default" >> .env
       working-directory: my_project
 
-    - name: Install Doctrine ORM if needed
-      run: composer require symfony/orm-pack --no-progress --no-interaction || true
+    - name: Create both test databases
+      run: |
+        PGPASSWORD=test_password psql -h localhost -U test_user -d postgres -c "CREATE DATABASE test_db_test;"
+        PGPASSWORD=test_password psql -h localhost -U test_user -d postgres -c "CREATE DATABASE test_db;"
       working-directory: my_project
 
     - name: Run database migrations
