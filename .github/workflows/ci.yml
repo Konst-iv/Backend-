@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ dz_3 ]
+    branches: [ main, dz_3 ]
   pull_request:
-    branches: [ dz_3 ]
+    branches: [ main ]
 
 jobs:
   tests:
@@ -39,17 +39,17 @@ jobs:
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-interaction
-      working-directory: ./my_project
+      working-directory: my_project
 
     - name: Copy test environment
       run: cp .env.test .env
-      working-directory: ./my_project
+      working-directory: my_project
 
     - name: Run database migrations
       run: |
         php bin/console doctrine:database:create --env=test
         php bin/console doctrine:migrations:migrate --env=test -n
-      working-directory: ./my_project
+      working-directory: my_project
 
     - name: Add test houses data
       run: |
@@ -59,16 +59,22 @@ jobs:
         (2, 'Лесной домик', 4, 'никаких', 300, true, 1800.00),
         (3, 'Эконом вариант', 2, 'санузел', 100, true, 1200.00)
         " --env=test
-      working-directory: ./my_project
+      working-directory: my_project
+
+    - name: Clear test database before tests
+      run: |
+        php bin/console doctrine:schema:drop --env=test --force --no-interaction
+        php bin/console doctrine:schema:create --env=test --no-interaction
+      working-directory: my_project
 
     - name: Run unit tests
       run: ./vendor/bin/phpunit --testsuite=unit
-      working-directory: ./my_project
+      working-directory: my_project
 
     - name: Run integration tests  
       run: ./vendor/bin/phpunit --testsuite=integration
-      working-directory: ./my_project
+      working-directory: my_project
 
     - name: Run all tests
       run: ./vendor/bin/phpunit --testsuite=all
-      working-directory: ./my_project
+      working-directory: my_project
