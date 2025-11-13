@@ -54,10 +54,10 @@ jobs:
     - name: Add test houses data
       run: |
         php bin/console doctrine:query:sql "
-        INSERT INTO houses (name, beds, amenities, distance_to_sea, is_available, price_per_night) VALUES 
-        ('Домик у моря', 2, 'санузел, душевая кабина', 50, true, 2500.00),
-        ('Лесной домик', 4, 'никаких', 300, true, 1800.00),
-        ('Эконом вариант', 2, 'санузел', 100, true, 1200.00)
+        INSERT INTO houses (id, name, beds, amenities, distance_to_sea, is_available, price_per_night) VALUES 
+        (1, 'Домик у моря', 2, 'санузел, душевая кабина', 50, true, 2500.00),
+        (2, 'Лесной домик', 4, 'никаких', 300, true, 1800.00),
+        (3, 'Эконом вариант', 2, 'санузел', 100, true, 1200.00)
         " --env=test
       working-directory: ./my_project
 
