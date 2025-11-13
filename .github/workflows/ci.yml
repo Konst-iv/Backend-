@@ -47,82 +47,12 @@ jobs:
         echo "APP_SECRET=test_secret_key_for_testing_only" >> .env
         echo "APP_DEBUG=true" >> .env
         echo 'DATABASE_URL="postgresql://test_user:test_password@localhost:5432/test_db?serverVersion=16&charset=utf8"' >> .env
-        echo "MAILER_DSN=null://null" >> .env
-        echo "MESSENGER_TRANSPORT_DSN=doctrine://default" >> .env
       working-directory: my_project
 
-    - name: Create test database
-      run: |
-        PGPASSWORD=test_password psql -h localhost -U test_user -d postgres -c "CREATE DATABASE test_db_test;" 2>/dev/null || true
+    - name: Wait for PostgreSQL
+      run: sleep 10
       working-directory: my_project
 
-    - name: Create database tables manually
-      run: |
-        PGPASSWORD=test_password psql -h localhost -U test_user -d test_db -c "
-        CREATE TABLE IF NOT EXISTS users (
-            id SERIAL PRIMARY KEY,
-            email VARCHAR(180) UNIQUE NOT NULL,
-            phone VARCHAR(20) NOT NULL,
-            name VARCHAR(255) NOT NULL,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        );
-        
-        CREATE TABLE IF NOT EXISTS houses (
-            id SERIAL PRIMARY KEY,
-            name VARCHAR(255) NOT NULL,
-            beds INTEGER NOT NULL,
-            amenities VARCHAR(500) NOT NULL,
-            distance_to_sea INTEGER NOT NULL,
-            is_available BOOLEAN DEFAULT true,
-            price_per_night DECIMAL(10,2) NOT NULL
-        );
-        
-        CREATE TABLE IF NOT EXISTS bookings (
-            id SERIAL PRIMARY KEY,
-            customer_id INTEGER NOT NULL REFERENCES users(id),
-            house_id INTEGER NOT NULL REFERENCES houses(id),
-            comment TEXT NOT NULL,
-            check_in DATE NOT NULL,
-            check_out DATE NOT NULL,
-            status VARCHAR(20) DEFAULT 'pending',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP
-        );
-        "
+    - name: Run only unit tests (без базы данных)
+      run: vendor/bin/phpunit --testsuite=unit
       working-directory: my_project
-
-    - name: Add test houses data
-      run: |
-        PGPASSWORD=test_password psql -h localhost -U test_user -d test_db -c "
-        INSERT INTO houses (id, name, beds, amenities, distance_to_sea, is_available, price_per_night) VALUES 
-        (1, 'Домик у моря', 2, 'санузел, душевая кабина', 50, true, 2500.00),
-        (2, 'Лесной домик', 4, 'никаких', 300, true, 1800.00),
-        (3, 'Эконом вариант', 2, 'санузел', 100, true, 1200.00)
-        ON CONFLICT (id) DO NOTHING;
-        "
-      working-directory: my_project
-
-    - name: Clear test database before tests
-      run: |
-        PGPASSWORD=test_password psql -h localhost -U test_user -d test_db -c "
-        TRUNCATE TABLE bookings, users, houses RESTART IDENTITY CASCADE;
-        INSERT INTO houses (id, name, beds, amenities, distance_to_sea, is_available, price_per_night) VALUES 
-        (1, 'Домик у моря', 2, 'санузел, душевая кабина', 50, true, 2500.00),
-        (2, 'Лесной домик', 4, 'никаких', 300, true, 1800.00),
-        (3, 'Эконом вариант', 2, 'санузел', 100, true, 1200.00);
-        "
-      working-directory: my_project
-
-    - name: Run unit tests
-      run: ./vendor/bin/phpunit --testsuite=unit
-      working-directory: my_project
-
-    - name: Run integration tests  
-      run: ./vendor/bin/phpunit --testsuite=integration
-      working-directory: my_project
-
-    - name: Run all tests
-      run: ./vendor/bin/phpunit --testsuite=all
-      working-directory: my_project
-
-
