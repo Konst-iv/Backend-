@@ -14,19 +14,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        path: my_project  # ← ЯВНО УКАЖЕМ ПУТЬ
-
-    - name: Debug - Check what was checked out
-      run: |
-        echo "=== Current directory ==="
-        pwd
-        echo "=== Listing files ==="
-        ls -la
-        echo "=== my_project content ==="
-        ls -la my_project/
-        echo "=== composer.json path ==="
-        find . -name "composer.json" -type f
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
@@ -37,15 +24,12 @@ jobs:
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-interaction
-      working-directory: my_project
 
     - name: Run PHP Code Sniffer
       run: ./vendor/bin/phpcs
-      working-directory: my_project
 
     - name: Run Psalm
       run: ./vendor/bin/psalm --output-format=github
-      working-directory: my_project
 
   tests:
     name: Run Tests
@@ -69,8 +53,6 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      with:
-        path: my_project  
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
