@@ -39,10 +39,6 @@ jobs:
     name: Run Tests
     runs-on: ubuntu-latest
     
-    defaults:
-      run:
-        working-directory: my_project
-    
     services:
       postgres:
         image: postgres:16
@@ -71,6 +67,7 @@ jobs:
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-interaction
+      working-directory: my_project
 
     - name: Setup test environment
       run: |
@@ -78,9 +75,12 @@ jobs:
         echo "APP_SECRET=test_secret_key_for_testing_only" >> .env
         echo "APP_DEBUG=true" >> .env
         echo 'DATABASE_URL="postgresql://test_user:test_password@localhost:5432/test_db?serverVersion=16&charset=utf8"' >> .env
+      working-directory: my_project
 
     - name: Wait for PostgreSQL
       run: sleep 10
+      working-directory: my_project
 
     - name: Run only unit tests (без базы данных)
       run: vendor/bin/phpunit --testsuite=unit
+      working-directory: my_project
