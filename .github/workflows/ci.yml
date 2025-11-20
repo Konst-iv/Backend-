@@ -14,6 +14,19 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        path: my_project  # ← ЯВНО УКАЖЕМ ПУТЬ
+
+    - name: Debug - Check what was checked out
+      run: |
+        echo "=== Current directory ==="
+        pwd
+        echo "=== Listing files ==="
+        ls -la
+        echo "=== my_project content ==="
+        ls -la my_project/
+        echo "=== composer.json path ==="
+        find . -name "composer.json" -type f
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
@@ -56,6 +69,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        path: my_project  
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
