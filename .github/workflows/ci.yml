@@ -24,12 +24,15 @@ jobs:
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-interaction
+      working-directory: my_project
 
     - name: Run PHP Code Sniffer
       run: ./vendor/bin/phpcs
+      working-directory: my_project
 
     - name: Run Psalm
       run: ./vendor/bin/psalm --output-format=github
+      working-directory: my_project
 
   tests:
     name: Run Tests
