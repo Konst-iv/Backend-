@@ -1,10 +1,13 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
-use Doctrine\ORM\Mapping as ORM;
-use Doctrine\Common\Collections\Collection;
+use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
@@ -25,14 +28,14 @@ class User
     private ?string $name = null;
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private ?DateTimeImmutable $createdAt = null;
 
     #[ORM\OneToMany(mappedBy: 'customer', targetEntity: Booking::class)]
     private Collection $bookings;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new DateTimeImmutable();
         $this->bookings = new ArrayCollection();
     }
 
@@ -49,6 +52,7 @@ class User
     public function setEmail(string $email): static
     {
         $this->email = $email;
+
         return $this;
     }
 
@@ -60,6 +64,7 @@ class User
     public function setPhone(string $phone): static
     {
         $this->phone = $phone;
+
         return $this;
     }
 
@@ -71,10 +76,11 @@ class User
     public function setName(string $name): static
     {
         $this->name = $name;
+
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): ?DateTimeImmutable
     {
         return $this->createdAt;
     }

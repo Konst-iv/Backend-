@@ -1,8 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Controller;
 
 use App\Service\UserService;
+use Exception;
+use InvalidArgumentException;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -10,7 +14,9 @@ use Symfony\Component\Routing\Annotation\Route;
 
 class UserController extends AbstractController
 {
-    public function __construct(private UserService $userService) {}
+    public function __construct(private UserService $userService)
+    {
+    }
 
     #[Route('/api/users', name: 'create_user', methods: ['POST'])]
     public function createUser(Request $request): JsonResponse
@@ -38,16 +44,15 @@ class UserController extends AbstractController
                     'email' => $user->getEmail(),
                     'phone' => $user->getPhone(),
                     'name' => $user->getName(),
-                    'createdAt' => $user->getCreatedAt()->format('Y-m-d H:i:s')
+                    'createdAt' => $user->getCreatedAt()?->format('Y-m-d H:i:s') ?? '',
                 ]
             ], 201);
-
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $e) {
             return $this->json([
                 'success' => false,
                 'error' => $e->getMessage()
             ], 400);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->json([
                 'success' => false,
                 'error' => 'Internal server error'
@@ -75,11 +80,10 @@ class UserController extends AbstractController
                     'email' => $user->getEmail(),
                     'phone' => $user->getPhone(),
                     'name' => $user->getName(),
-                    'createdAt' => $user->getCreatedAt()->format('Y-m-d H:i:s')
+                    'createdAt' => $user->getCreatedAt()?->format('Y-m-d H:i:s') ?? '',
                 ]
             ]);
-
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return $this->json([
                 'success' => false,
                 'error' => 'Internal server error'

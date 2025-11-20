@@ -1,15 +1,20 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Tests;
 
 use App\Entity\Booking;
-use App\Entity\User;
 use App\Entity\House;
+use App\Entity\User;
 use App\Repository\BookingRepository;
 use App\Repository\HouseRepository;
 use App\Service\BookingService;
+use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
+use InvalidArgumentException;
 use PHPUnit\Framework\TestCase;
+use ReflectionClass;
 
 class BookingServiceTest extends TestCase
 {
@@ -18,13 +23,14 @@ class BookingServiceTest extends TestCase
     private $houseRepository;
     private $entityManager;
 
+    #[\Override]
     protected function setUp(): void
     {
         // Создаем моки
         $this->bookingRepository = $this->createMock(BookingRepository::class);
         $this->houseRepository = $this->createMock(HouseRepository::class);
         $this->entityManager = $this->createMock(EntityManagerInterface::class);
-        
+
         $this->bookingService = new BookingService(
             $this->bookingRepository,
             $this->houseRepository,
@@ -41,9 +47,9 @@ class BookingServiceTest extends TestCase
         $house = new House();
         $house->setName('Test House');
         $house->setIsAvailable(true);
-        
+
         // Используем Reflection для установки ID
-        $reflection = new \ReflectionClass($house);
+        $reflection = new ReflectionClass($house);
         $idProperty = $reflection->getProperty('id');
         $idProperty->setAccessible(true);
         $idProperty->setValue($house, 1);
@@ -59,8 +65,8 @@ class BookingServiceTest extends TestCase
         $this->entityManager->expects($this->once())
             ->method('flush');
 
-        $checkIn = new \DateTime('2024-01-20');
-        $checkOut = new \DateTime('2024-01-25');
+        $checkIn = new DateTime('2024-01-20');
+        $checkOut = new DateTime('2024-01-25');
 
         $booking = $this->bookingService->createBooking(
             $user,
@@ -80,16 +86,16 @@ class BookingServiceTest extends TestCase
     public function testCreateBookingHouseNotFound(): void
     {
         $user = new User();
-        
+
         $this->houseRepository->method('find')
             ->with(999)
             ->willReturn(null);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('House with ID 999 not found');
 
-        $checkIn = new \DateTime('2024-01-20');
-        $checkOut = new \DateTime('2024-01-25');
+        $checkIn = new DateTime('2024-01-20');
+        $checkOut = new DateTime('2024-01-25');
 
         $this->bookingService->createBooking($user, 999, 'Comment', $checkIn, $checkOut);
     }
@@ -97,7 +103,7 @@ class BookingServiceTest extends TestCase
     public function testCreateBookingHouseNotAvailable(): void
     {
         $user = new User();
-        
+
         $house = new House();
         $house->setName('Unavailable House');
         $house->setIsAvailable(false);
@@ -106,11 +112,11 @@ class BookingServiceTest extends TestCase
             ->with(1)
             ->willReturn($house);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('House with ID 1 is not available');
 
-        $checkIn = new \DateTime('2024-01-20');
-        $checkOut = new \DateTime('2024-01-25');
+        $checkIn = new DateTime('2024-01-20');
+        $checkOut = new DateTime('2024-01-25');
 
         $this->bookingService->createBooking($user, 1, 'Comment', $checkIn, $checkOut);
     }
@@ -118,7 +124,7 @@ class BookingServiceTest extends TestCase
     public function testCreateBookingInvalidDates(): void
     {
         $user = new User();
-        
+
         $house = new House();
         $house->setName('Test House');
         $house->setIsAvailable(true);
@@ -127,11 +133,11 @@ class BookingServiceTest extends TestCase
             ->with(1)
             ->willReturn($house);
 
-        $this->expectException(\InvalidArgumentException::class);
+        $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Check-in date must be before check-out date');
 
-        $checkIn = new \DateTime('2024-01-25');
-        $checkOut = new \DateTime('2024-01-20');
+        $checkIn = new DateTime('2024-01-25');
+        $checkOut = new DateTime('2024-01-20');
 
         $this->bookingService->createBooking($user, 1, 'Comment', $checkIn, $checkOut);
     }
@@ -140,7 +146,7 @@ class BookingServiceTest extends TestCase
     {
         $user = new User();
         $house = new House();
-        
+
         $booking = new Booking();
         $booking->setCustomer($user);
         $booking->setHouse($house);

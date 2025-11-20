@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Command;
 
 use App\Entity\House;
@@ -21,6 +23,7 @@ class AddTestHousesCommand extends Command
         parent::__construct();
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);

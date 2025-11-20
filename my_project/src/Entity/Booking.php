@@ -1,7 +1,11 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Entity;
 
+use DateTimeImmutable;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
@@ -25,23 +29,23 @@ class Booking
     private ?string $comment = null;
 
     #[ORM\Column(type: 'date')]
-    private ?\DateTimeInterface $checkIn = null;
+    private ?DateTimeInterface $checkIn = null;
 
     #[ORM\Column(type: 'date')]
-    private ?\DateTimeInterface $checkOut = null;
+    private ?DateTimeInterface $checkOut = null;
 
     #[ORM\Column(length: 20)]
     private ?string $status = 'pending';
 
     #[ORM\Column]
-    private ?\DateTimeImmutable $createdAt = null;
+    private ?DateTimeImmutable $createdAt = null;
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $updatedAt = null;
+    private ?DateTimeImmutable $updatedAt = null;
 
     public function __construct()
     {
-        $this->createdAt = new \DateTimeImmutable();
+        $this->createdAt = new DateTimeImmutable();
     }
 
     // Геттеры и сеттеры
@@ -58,6 +62,7 @@ class Booking
     public function setCustomer(?User $customer): static
     {
         $this->customer = $customer;
+
         return $this;
     }
 
@@ -69,6 +74,7 @@ class Booking
     public function setHouse(?House $house): static
     {
         $this->house = $house;
+
         return $this;
     }
 
@@ -80,28 +86,31 @@ class Booking
     public function setComment(string $comment): static
     {
         $this->comment = $comment;
+
         return $this;
     }
 
-    public function getCheckIn(): ?\DateTimeInterface
+    public function getCheckIn(): ?DateTimeInterface
     {
         return $this->checkIn;
     }
 
-    public function setCheckIn(\DateTimeInterface $checkIn): static
+    public function setCheckIn(DateTimeInterface $checkIn): static
     {
         $this->checkIn = $checkIn;
+
         return $this;
     }
 
-    public function getCheckOut(): ?\DateTimeInterface
+    public function getCheckOut(): ?DateTimeInterface
     {
         return $this->checkOut;
     }
 
-    public function setCheckOut(\DateTimeInterface $checkOut): static
+    public function setCheckOut(DateTimeInterface $checkOut): static
     {
         $this->checkOut = $checkOut;
+
         return $this;
     }
 
@@ -113,22 +122,24 @@ class Booking
     public function setStatus(string $status): static
     {
         $this->status = $status;
+
         return $this;
     }
 
-    public function getCreatedAt(): ?\DateTimeImmutable
+    public function getCreatedAt(): ?DateTimeImmutable
     {
         return $this->createdAt;
     }
 
-    public function getUpdatedAt(): ?\DateTimeImmutable
+    public function getUpdatedAt(): ?DateTimeImmutable
     {
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
+    public function setUpdatedAt(?DateTimeImmutable $updatedAt): static
     {
         $this->updatedAt = $updatedAt;
+
         return $this;
     }
 }
