@@ -27,8 +27,13 @@ class BookingService
         return $this->houseRepository->findBy(['isAvailable' => true]);
     }
 
-    public function createBooking(User $user, int $houseId, string $comment, DateTimeInterface $checkIn, DateTimeInterface $checkOut): Booking
-    {
+    public function createBooking(
+        User $user,
+        int $houseId,
+        string $comment,
+        \DateTimeInterface $checkIn,
+        \DateTimeInterface $checkOut
+    ): Booking {
         $house = $this->houseRepository->find($houseId);
 
         if (!$house) {
