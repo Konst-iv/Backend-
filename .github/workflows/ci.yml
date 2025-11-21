@@ -86,9 +86,6 @@ jobs:
       run: ./vendor/bin/phpcs --standard=PSR12 src/
       working-directory: my_project
 
-    - name: Run Psalm Static Analysis
-      run: ./vendor/bin/psalm --init ./src  
-      working-directory: my_project
 
     - name: Run Psalm
       run: ./vendor/bin/psalm --output-format=github
