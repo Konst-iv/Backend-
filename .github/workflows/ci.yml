@@ -76,9 +76,7 @@ jobs:
       run: composer install --prefer-dist --no-progress --no-interaction
       working-directory: my_project
 
-    - name: Install code quality tools
-      run: composer require --dev squizlabs/php_codesniffer vimeo/psalm enlightn/security-checker --no-progress --no-interaction
-      working-directory: my_project
+   
 
     - name: List installed tools
       run: ls -la vendor/bin/
