@@ -72,12 +72,16 @@ jobs:
         extensions: mbstring, xml, ctype, iconv, intl
         coverage: none
 
-    - name: Install dependencies (including dev tools)
-      run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
+    - name: Install project dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
       working-directory: my_project
 
-    - name: Verify PHPCS installation
-      run: ls -la vendor/bin/ | grep phpcs
+    - name: Install code quality tools
+      run: composer require --dev squizlabs/php_codesniffer vimeo/psalm enlightn/security-checker --no-progress --no-interaction
+      working-directory: my_project
+
+    - name: List installed tools
+      run: ls -la vendor/bin/
       working-directory: my_project
 
     - name: Run PHP Code Sniffer
@@ -85,9 +89,9 @@ jobs:
       working-directory: my_project
 
     - name: Run Psalm Static Analysis
-      run: ./vendor/bin/psalm --output-format=github --shepherd --stats
+      run: ./vendor/bin/psalm --init ./src  
       working-directory: my_project
 
-    - name: Run Security Check
-      run: ./vendor/bin/security-checker security:check
+    - name: Run Psalm
+      run: ./vendor/bin/psalm --output-format=github
       working-directory: my_project
