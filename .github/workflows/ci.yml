@@ -15,9 +15,9 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_DB: test_db
-          POSTGRES_USER: test_user  
-          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: booking_db
+          POSTGRES_USER: user  
+          POSTGRES_PASSWORD: password
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -39,23 +39,37 @@ jobs:
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-interaction
-      working-directory: my_project
 
-    - name: Setup test environment
+    - name: Setup test environment for GitHub Actions
       run: |
-        echo "APP_ENV=test" > .env
-        echo "APP_SECRET=test_secret_key_for_testing_only" >> .env
-        echo "APP_DEBUG=true" >> .env
-        echo 'DATABASE_URL="postgresql://test_user:test_password@localhost:5432/test_db?serverVersion=16&charset=utf8"' >> .env
-      working-directory: my_project
+        # Создаем .env.test специально для GitHub Actions
+        echo "APP_ENV=test" > .env.test
+        echo "APP_SECRET=test_secret_key_for_testing_only" >> .env.test
+        echo "APP_DEBUG=true" >> .env.test
+        echo 'DATABASE_URL="postgresql://user:password@localhost:5432/booking_db?serverVersion=16&charset=utf8"' >> .env.test
+        echo 'MAILER_DSN=null://null' >> .env.test
+        echo 'MESSENGER_TRANSPORT_DSN=doctrine://default' >> .env.test
 
     - name: Wait for PostgreSQL
       run: sleep 10
-      working-directory: my_project
 
-    - name: Run only unit tests (без базы данных)
-      run: vendor/bin/phpunit --testsuite=unit
-      working-directory: my_project
+    - name: Create test database
+      run: php bin/console doctrine:database:create --env=test
+
+    - name: Run migrations for tests
+      run: php bin/console doctrine:migrations:migrate --env=test --no-interaction
+
+    - name: Clear test cache
+      run: php bin/console cache:clear --env=test
+
+    - name: Run unit tests
+      run: vendor/bin/phpunit --testsuite=unit --no-coverage
+
+    - name: Run integration tests
+      run: vendor/bin/phpunit tests/Controller/ tests/BookingControllerTest.php --no-coverage
+
+    - name: Run authentication tests
+      run: vendor/bin/phpunit tests/Controller/AuthControllerTest.php --no-coverage
 
   code-quality:
     name: Code Quality Checks
@@ -74,19 +88,17 @@ jobs:
 
     - name: Install project dependencies
       run: composer install --prefer-dist --no-progress --no-interaction
-      working-directory: my_project
-
-   
-
-    - name: List installed tools
-      run: ls -la vendor/bin/
-      working-directory: my_project
 
     - name: Run PHP Code Sniffer
-      run: ./vendor/bin/phpcs --standard=PSR12 src/
-      working-directory: my_project
+      run: ./vendor/bin/phpcs --standard=PSR12 src/ tests/
 
+    - name: Run Psalm with baseline
+      run: |
+        ./vendor/bin/psalm --set-baseline=psalm-baseline.xml
+        ./vendor/bin/psalm --use-baseline=psalm-baseline.xml --output-format=github
 
-    - name: Run Psalm
-      run: ./vendor/bin/psalm --output-format=github
-      working-directory: my_project
+    - name: Validate Symfony configuration
+      run: php bin/console debug:container --env=test
+
+    - name: Check routing
+      run: php bin/console debug:router --env=test
