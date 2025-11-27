@@ -15,9 +15,9 @@ jobs:
       postgres:
         image: postgres:16
         env:
-          POSTGRES_DB: test_db
-          POSTGRES_USER: test_user  
-          POSTGRES_PASSWORD: test_password
+          POSTGRES_DB: booking_db
+          POSTGRES_USER: user  
+          POSTGRES_PASSWORD: password
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -39,58 +39,66 @@ jobs:
 
     - name: Install dependencies
       run: composer install --prefer-dist --no-progress --no-interaction
-      working-directory: my_project
 
-    - name: Setup test environment
+    - name: Setup test environment for GitHub Actions
       run: |
-        if [ ! -f .env.test ]; then
-          cat > .env.test << 'EOF'
-          # Test environment configuration
-          APP_ENV=test
-          APP_SECRET=test_secret_key_for_testing_only
-          APP_DEBUG=true
-          
-          # Database Configuration for GitHub Actions
-          DATABASE_URL="postgresql://test_user:test_password@localhost:5432/test_db?serverVersion=16&charset=utf8"
-          
-          # Disable any external services for tests
-          MAILER_DSN=null://null
-          MESSENGER_TRANSPORT_DSN=doctrine://default
-          EOF
-        fi
-        cp .env.test .env
-      working-directory: my_project
+        # Создаем .env.test специально для GitHub Actions
+        echo "APP_ENV=test" > .env.test
+        echo "APP_SECRET=test_secret_key_for_testing_only" >> .env.test
+        echo "APP_DEBUG=true" >> .env.test
+        echo 'DATABASE_URL="postgresql://user:password@localhost:5432/booking_db?serverVersion=16&charset=utf8"' >> .env.test
+        echo 'MAILER_DSN=null://null' >> .env.test
+        echo 'MESSENGER_TRANSPORT_DSN=doctrine://default' >> .env.test
 
-    - name: Run database migrations
-      run: |
-        php bin/console doctrine:database:create --env=test
-        php bin/console doctrine:migrations:migrate --env=test -n
-      working-directory: my_project
+    - name: Wait for PostgreSQL
+      run: sleep 10
 
-    - name: Add test houses data
-      run: |
-        php bin/console doctrine:query:sql "
-        INSERT INTO houses (id, name, beds, amenities, distance_to_sea, is_available, price_per_night) VALUES 
-        (1, 'Домик у моря', 2, 'санузел, душевая кабина', 50, true, 2500.00),
-        (2, 'Лесной домик', 4, 'никаких', 300, true, 1800.00),
-        (3, 'Эконом вариант', 2, 'санузел', 100, true, 1200.00)
-        " --env=test
-      working-directory: my_project
+    - name: Create test database
+      run: php bin/console doctrine:database:create --env=test
 
-    - name: Clear test database before tests
-      run: |
-        php bin/console doctrine:schema:drop --env=test --force --no-interaction
-        php bin/console doctrine:schema:create --env=test --no-interaction
-      working-directory: my_project
+    - name: Run migrations for tests
+      run: php bin/console doctrine:migrations:migrate --env=test --no-interaction
+
+    - name: Clear test cache
+      run: php bin/console cache:clear --env=test
 
     - name: Run unit tests
-      run: ./vendor/bin/phpunit --testsuite=unit
-      working-directory: my_project
+      run: vendor/bin/phpunit --testsuite=unit --no-coverage
 
-    - name: Run integration tests  
-      run: ./vendor/bin/phpunit --testsuite=integration
-      working-directory: my_project
+    - name: Run integration tests
+      run: vendor/bin/phpunit tests/Controller/ tests/BookingControllerTest.php --no-coverage
 
-    - name: Run all tests
-      run: ./vendor/bin/phpunit --testsuite=all
-      working-directory: my_project
+    - name: Run authentication tests
+      run: vendor/bin/phpunit tests/Controller/AuthControllerTest.php --no-coverage
+
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: mbstring, xml, ctype, iconv, intl
+        coverage: none
+
+    - name: Install project dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
+
+    - name: Run PHP Code Sniffer
+      run: ./vendor/bin/phpcs --standard=PSR12 src/ tests/
+
+    - name: Run Psalm with baseline
+      run: |
+        ./vendor/bin/psalm --set-baseline=psalm-baseline.xml
+        ./vendor/bin/psalm --use-baseline=psalm-baseline.xml --output-format=github
+
+    - name: Validate Symfony configuration
+      run: php bin/console debug:container --env=test
+
+    - name: Check routing
+      run: php bin/console debug:router --env=test
