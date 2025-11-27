@@ -42,11 +42,13 @@ security:
         # - { path: ^/admin, roles: ROLE_ADMIN }
         # - { path: ^/profile, roles: ROLE_USER }
         
-
+          
+        - { path: ^/api$, roles: PUBLIC_ACCESS}
         - { path: ^/api/auth/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/auth/logout, roles: PUBLIC_ACCESS }        
         - { path: ^/api, roles: ROLE_USER }
+
 
 when@test:
     security:
