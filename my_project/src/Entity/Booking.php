@@ -4,12 +4,31 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Controller\BookingController;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use ApiPlatform\Metadata\Put;
 use DateTimeImmutable;
 use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'bookings')]
+#[ApiResource(
+    operations: [
+        new Post(
+            uriTemplate: '/bookings',
+            controller: BookingController::class . '::createBooking',
+            description: 'Create new booking'
+        ),
+        new Put(
+            uriTemplate: '/bookings',
+            controller: BookingController::class . '::updateBooking',
+            description: 'Update booking comment'
+        )
+    ]
+)]
 class Booking
 {
     #[ORM\Id]

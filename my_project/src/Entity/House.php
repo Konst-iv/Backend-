@@ -4,12 +4,25 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Controller\BookingController;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'houses')]
+#[ApiResource(
+    operations: [
+        new GetCollection(
+            uriTemplate: '/houses/available',
+            controller: BookingController::class . '::getAvailableHouses',
+            description: 'Get available houses'
+        )
+    ]
+)]
 class House
 {
     #[ORM\Id]
