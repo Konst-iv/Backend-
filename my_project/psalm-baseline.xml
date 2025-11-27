@@ -22,10 +22,21 @@
   </file>
   <file src="src/Entity/House.php">
     <PossiblyUnusedMethod>
+      <code><![CDATA[addBooking]]></code>
       <code><![CDATA[getAmenities]]></code>
       <code><![CDATA[getBeds]]></code>
+      <code><![CDATA[getBookings]]></code>
       <code><![CDATA[getDistanceToSea]]></code>
       <code><![CDATA[getPricePerNight]]></code>
+      <code><![CDATA[removeBooking]]></code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Entity/User.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[addBooking]]></code>
+      <code><![CDATA[getBookings]]></code>
+      <code><![CDATA[removeBooking]]></code>
+      <code><![CDATA[setRoles]]></code>
     </PossiblyUnusedMethod>
   </file>
   <file src="src/Repository/BookingRepository.php">

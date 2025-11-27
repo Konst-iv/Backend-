@@ -108,7 +108,7 @@ class BookingControllerTest extends WebTestCase
         $response = $this->client->getResponse();
         $data = json_decode($response->getContent(), true);
         $this->assertFalse($data['success']);
-        $this->assertNotEmpty($data['error']);    
+        $this->assertNotEmpty($data['error']);
     }
 
     public function testCreateBooking(): void
