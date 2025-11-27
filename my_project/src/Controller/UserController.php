@@ -24,17 +24,22 @@ class UserController extends AbstractController
         try {
             $data = json_decode($request->getContent(), true);
 
-            if (!isset($data['email']) || !isset($data['phone']) || !isset($data['name'])) {
-                return $this->json([
-                    'success' => false,
-                    'error' => 'Missing required fields: email, phone, name'
-                ], 400);
+            $requiredFields = ['email', 'phone', 'name', 'password'];
+
+            foreach ($requiredFields as $field) {
+                if (!isset($data[$field])) {
+                    return $this->json([
+                        'success' => false,
+                        'error' => "Missing required field: $field"
+                    ], 400);
+                }
             }
 
             $user = $this->userService->createUser(
                 $data['email'],
                 $data['phone'],
-                $data['name']
+                $data['name'],
+                $data['password']
             );
 
             return $this->json([

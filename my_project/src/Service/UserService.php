@@ -8,34 +8,43 @@ use App\Entity\User;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 class UserService
 {
     public function __construct(
         private UserRepository $userRepository,
-        private EntityManagerInterface $entityManager
+        private EntityManagerInterface $entityManager,
+        private UserPasswordHasherInterface $passwordHasher
     ) {
     }
 
-    public function createUser(string $email, string $phone, string $name): User
+    public function createUser(string $email, string $phone, string $name, string $password): User
     {
-        // Проверяем существует ли пользователь с таким email
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            throw new InvalidArgumentException('Invalid email format');
+        }
+
+        if (!preg_match('/^\+7\d{10}$/', $phone)) {
+            throw new InvalidArgumentException('Phone must be in format +7XXXXXXXXXX');
+        }
+
         if ($this->userRepository->findOneBy(['email' => $email])) {
             throw new InvalidArgumentException('User with this email already exists');
         }
 
-        // Проверяем существует ли пользователь с таким телефоном
         if ($this->userRepository->findOneBy(['phone' => $phone])) {
             throw new InvalidArgumentException('User with this phone already exists');
         }
 
-        // Создаем нового пользователя
         $user = new User();
         $user->setEmail($email);
         $user->setPhone($phone);
         $user->setName($name);
 
-        // Сохраняем в базу
+        $hashedPassword = $this->passwordHasher->hashPassword($user, $password);
+        $user->setPassword($hashedPassword);
+
         $this->entityManager->persist($user);
         $this->entityManager->flush();
 
@@ -50,5 +59,10 @@ class UserService
     public function getUserByEmail(string $email): ?User
     {
         return $this->userRepository->findOneBy(['email' => $email]);
+    }
+
+    public function getUserByPhone(string $phone): ?User
+    {
+        return $this->userRepository->findOneBy(['phone' => $phone]);
     }
 }

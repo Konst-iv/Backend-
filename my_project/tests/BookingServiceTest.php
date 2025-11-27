@@ -13,6 +13,7 @@ use App\Service\BookingService;
 use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use InvalidArgumentException;
+use Override;
 use PHPUnit\Framework\TestCase;
 use ReflectionClass;
 
@@ -23,7 +24,7 @@ class BookingServiceTest extends TestCase
     private $houseRepository;
     private $entityManager;
 
-    #[\Override]
+    #[Override]
     protected function setUp(): void
     {
         // Создаем моки

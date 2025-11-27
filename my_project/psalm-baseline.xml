@@ -5,6 +5,11 @@
       <code><![CDATA[AddTestHousesCommand]]></code>
     </UnusedClass>
   </file>
+  <file src="src/Controller/AuthController.php">
+    <UnusedClass>
+      <code><![CDATA[AuthController]]></code>
+    </UnusedClass>
+  </file>
   <file src="src/Controller/BookingController.php">
     <UnusedClass>
       <code><![CDATA[BookingController]]></code>
@@ -15,28 +20,12 @@
       <code><![CDATA[UserController]]></code>
     </UnusedClass>
   </file>
-  <file src="src/Entity/Booking.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[setUpdatedAt]]></code>
-    </PossiblyUnusedMethod>
-  </file>
   <file src="src/Entity/House.php">
     <PossiblyUnusedMethod>
-      <code><![CDATA[addBooking]]></code>
       <code><![CDATA[getAmenities]]></code>
       <code><![CDATA[getBeds]]></code>
-      <code><![CDATA[getBookings]]></code>
       <code><![CDATA[getDistanceToSea]]></code>
       <code><![CDATA[getPricePerNight]]></code>
-      <code><![CDATA[isAvailable]]></code>
-      <code><![CDATA[removeBooking]]></code>
-    </PossiblyUnusedMethod>
-  </file>
-  <file src="src/Entity/User.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[addBooking]]></code>
-      <code><![CDATA[getBookings]]></code>
-      <code><![CDATA[removeBooking]]></code>
     </PossiblyUnusedMethod>
   </file>
   <file src="src/Repository/BookingRepository.php">
@@ -63,42 +52,57 @@
       <code><![CDATA[$registry]]></code>
     </PossiblyUnusedParam>
   </file>
-  <file src="src/Service/BookingService.php">
-    <ArgumentTypeCoercion>
-      <code><![CDATA[$house]]></code>
-    </ArgumentTypeCoercion>
-    <LessSpecificReturnStatement>
-      <code><![CDATA[$booking]]></code>
-    </LessSpecificReturnStatement>
-    <MoreSpecificReturnType>
-      <code><![CDATA[?Booking]]></code>
-    </MoreSpecificReturnType>
-    <PossiblyUnusedMethod>
-      <code><![CDATA[getUserBookings]]></code>
-    </PossiblyUnusedMethod>
+  <file src="src/Security/JwtAuthenticator.php">
+    <UnusedClass>
+      <code><![CDATA[JwtAuthenticator]]></code>
+    </UnusedClass>
   </file>
   <file src="src/Service/UserService.php">
-    <LessSpecificReturnStatement>
-      <code><![CDATA[$this->userRepository->find($id)]]></code>
-      <code><![CDATA[$this->userRepository->findOneBy(['email' => $email])]]></code>
-    </LessSpecificReturnStatement>
-    <MoreSpecificReturnType>
-      <code><![CDATA[?User]]></code>
-      <code><![CDATA[?User]]></code>
-    </MoreSpecificReturnType>
     <PossiblyUnusedMethod>
       <code><![CDATA[__construct]]></code>
       <code><![CDATA[getUserByEmail]]></code>
     </PossiblyUnusedMethod>
   </file>
   <file src="tests/BookingControllerTest.php">
+    <PossiblyFalseArgument>
+      <code><![CDATA[$response->getContent()]]></code>
+      <code><![CDATA[$response->getContent()]]></code>
+      <code><![CDATA[$response->getContent()]]></code>
+      <code><![CDATA[$response->getContent()]]></code>
+      <code><![CDATA[$response->getContent()]]></code>
+      <code><![CDATA[$response->getContent()]]></code>
+      <code><![CDATA[$response->getContent()]]></code>
+      <code><![CDATA[$this->client->getResponse()->getContent()]]></code>
+      <code><![CDATA[json_encode($bookingData)]]></code>
+      <code><![CDATA[json_encode($bookingData)]]></code>
+      <code><![CDATA[json_encode($bookingData)]]></code>
+      <code><![CDATA[json_encode($bookingData)]]></code>
+      <code><![CDATA[json_encode($loginData)]]></code>
+      <code><![CDATA[json_encode($updateData)]]></code>
+      <code><![CDATA[strtotime('+1 day')]]></code>
+      <code><![CDATA[strtotime('+3 days')]]></code>
+    </PossiblyFalseArgument>
+    <PossiblyNullReference>
+      <code><![CDATA[persist]]></code>
+    </PossiblyNullReference>
     <PossiblyUndefinedIntArrayOffset>
       <code><![CDATA[$data['data'][0]]]></code>
     </PossiblyUndefinedIntArrayOffset>
     <PossiblyUndefinedStringArrayOffset>
+      <code><![CDATA[$auth['token']]]></code>
+      <code><![CDATA[$auth['token']]]></code>
+      <code><![CDATA[$auth['token']]]></code>
+      <code><![CDATA[$auth['token']]]></code>
+      <code><![CDATA[$auth['token']]]></code>
+      <code><![CDATA[$auth['user']]]></code>
+      <code><![CDATA[$auth['user']]]></code>
       <code><![CDATA[$data['data']]]></code>
       <code><![CDATA[$house['isAvailable']]]></code>
     </PossiblyUndefinedStringArrayOffset>
+    <PropertyTypeCoercion>
+      <code><![CDATA[static::getContainer()->get(EntityManagerInterface::class)]]></code>
+      <code><![CDATA[static::getContainer()->get(UserPasswordHasherInterface::class)]]></code>
+    </PropertyTypeCoercion>
     <UnusedClass>
       <code><![CDATA[BookingControllerTest]]></code>
     </UnusedClass>
@@ -110,6 +114,11 @@
     <UnusedMethodCall>
       <code><![CDATA[setAccessible]]></code>
     </UnusedMethodCall>
+  </file>
+  <file src="tests/Controller/AuthControllerTest.php">
+    <UnusedClass>
+      <code><![CDATA[AuthControllerTest]]></code>
+    </UnusedClass>
   </file>
   <file src="tests/bootstrap.php">
     <PossiblyUndefinedArrayOffset>

@@ -31,8 +31,8 @@ class BookingService
         User $user,
         int $houseId,
         string $comment,
-        \DateTimeInterface $checkIn,
-        \DateTimeInterface $checkOut
+        DateTimeInterface $checkIn,
+        DateTimeInterface $checkOut
     ): Booking {
         $house = $this->houseRepository->find($houseId);
 
@@ -76,10 +76,5 @@ class BookingService
         $this->entityManager->flush();
 
         return $booking;
-    }
-
-    public function getUserBookings(User $user): array
-    {
-        return $this->bookingRepository->findBy(['customer' => $user]);
     }
 }

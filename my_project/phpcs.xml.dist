@@ -7,6 +7,11 @@
     <arg name="colors"/>
     <arg name="extensions" value="php"/>
 
+    <rule ref="Generic.CodeAnalysis.UnusedFunctionParameter">
+        <exclude-pattern>*/Security/*</exclude-pattern>
+        <exclude-pattern>*/EventListener/*</exclude-pattern>
+    </rule>
+
     <rule ref="PSR12">
         <properties>
             <property name="Generic.Metrics.NestingLevel.TooHigh" value="5"/>
@@ -15,7 +20,6 @@
     </rule>
 
     <rule ref="Generic.Metrics.NestingLevel"/>
-    <rule ref="Generic.CodeAnalysis.UnusedFunctionParameter"/>
     <rule ref="Generic.CodeAnalysis.EmptyStatement"/>
 
     <file>src</file>

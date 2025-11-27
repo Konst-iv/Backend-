@@ -6,6 +6,7 @@ namespace App\Command;
 
 use App\Entity\House;
 use Doctrine\ORM\EntityManagerInterface;
+use Override;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,7 +24,7 @@ class AddTestHousesCommand extends Command
         parent::__construct();
     }
 
-    #[\Override]
+    #[Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);

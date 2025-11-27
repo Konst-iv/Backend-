@@ -8,6 +8,9 @@ use App\Entity\House;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
+/**
+ * @extends ServiceEntityRepository<House>
+ */
 class HouseRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
