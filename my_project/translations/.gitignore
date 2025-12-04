@@ -17,6 +17,4 @@
 ###> symfony/asset-mapper ###
 /public/assets/
 /assets/vendor/
-/src/Service/houses.csv
-/src/Service/bookings.csv
 ###< symfony/asset-mapper ###
