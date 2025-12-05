@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<files psalm-version="6.13.1@1e3b7f0a8ab32b23197b91107adc0a7ed8a05b51">
+  <file src="src/Command/AddTestHousesCommand.php">
+    <UnusedClass>
+      <code><![CDATA[AddTestHousesCommand]]></code>
+    </UnusedClass>
+  </file>
+  <file src="src/Controller/BookingController.php">
+    <UnusedClass>
+      <code><![CDATA[BookingController]]></code>
+    </UnusedClass>
+  </file>
+  <file src="src/Controller/UserController.php">
+    <UnusedClass>
+      <code><![CDATA[UserController]]></code>
+    </UnusedClass>
+  </file>
+  <file src="src/Entity/Booking.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[setUpdatedAt]]></code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Entity/House.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[addBooking]]></code>
+      <code><![CDATA[getAmenities]]></code>
+      <code><![CDATA[getBeds]]></code>
+      <code><![CDATA[getBookings]]></code>
+      <code><![CDATA[getDistanceToSea]]></code>
+      <code><![CDATA[getPricePerNight]]></code>
+      <code><![CDATA[isAvailable]]></code>
+      <code><![CDATA[removeBooking]]></code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Entity/User.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[addBooking]]></code>
+      <code><![CDATA[getBookings]]></code>
+      <code><![CDATA[removeBooking]]></code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Repository/BookingRepository.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$registry]]></code>
+    </PossiblyUnusedParam>
+  </file>
+  <file src="src/Repository/HouseRepository.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$registry]]></code>
+    </PossiblyUnusedParam>
+  </file>
+  <file src="src/Repository/UserRepository.php">
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+    </PossiblyUnusedMethod>
+    <PossiblyUnusedParam>
+      <code><![CDATA[$registry]]></code>
+    </PossiblyUnusedParam>
+  </file>
+  <file src="src/Service/BookingService.php">
+    <ArgumentTypeCoercion>
+      <code><![CDATA[$house]]></code>
+    </ArgumentTypeCoercion>
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$booking]]></code>
+    </LessSpecificReturnStatement>
+    <MoreSpecificReturnType>
+      <code><![CDATA[?Booking]]></code>
+    </MoreSpecificReturnType>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[getUserBookings]]></code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="src/Service/UserService.php">
+    <LessSpecificReturnStatement>
+      <code><![CDATA[$this->userRepository->find($id)]]></code>
+      <code><![CDATA[$this->userRepository->findOneBy(['email' => $email])]]></code>
+    </LessSpecificReturnStatement>
+    <MoreSpecificReturnType>
+      <code><![CDATA[?User]]></code>
+      <code><![CDATA[?User]]></code>
+    </MoreSpecificReturnType>
+    <PossiblyUnusedMethod>
+      <code><![CDATA[__construct]]></code>
+      <code><![CDATA[getUserByEmail]]></code>
+    </PossiblyUnusedMethod>
+  </file>
+  <file src="tests/BookingControllerTest.php">
+    <PossiblyUndefinedIntArrayOffset>
+      <code><![CDATA[$data['data'][0]]]></code>
+    </PossiblyUndefinedIntArrayOffset>
+    <PossiblyUndefinedStringArrayOffset>
+      <code><![CDATA[$data['data']]]></code>
+      <code><![CDATA[$house['isAvailable']]]></code>
+    </PossiblyUndefinedStringArrayOffset>
+    <UnusedClass>
+      <code><![CDATA[BookingControllerTest]]></code>
+    </UnusedClass>
+  </file>
+  <file src="tests/BookingServiceTest.php">
+    <UnusedClass>
+      <code><![CDATA[BookingServiceTest]]></code>
+    </UnusedClass>
+    <UnusedMethodCall>
+      <code><![CDATA[setAccessible]]></code>
+    </UnusedMethodCall>
+  </file>
+  <file src="tests/bootstrap.php">
+    <PossiblyUndefinedArrayOffset>
+      <code><![CDATA[$_SERVER['APP_DEBUG']]]></code>
+    </PossiblyUndefinedArrayOffset>
+  </file>
+</files>
