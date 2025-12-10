@@ -50,7 +50,7 @@ class HouseCrudController extends AbstractCrudController
     }
 
     #[\Override]
-    public function configureFields(string $_pageName): iterable
+    public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->onlyOnIndex();
         yield TextField::new('name', 'Название');
