@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Controller\Admin;
 
 use App\Entity\User;
@@ -6,16 +9,17 @@ use Doctrine\ORM\EntityManagerInterface;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\ChoiceField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\DateTimeField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\EmailField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\ChoiceFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\TextFilter;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
+/** @extends AbstractCrudController<User> */
 class UserCrudController extends AbstractCrudController
 {
     private $passwordHasher;
@@ -25,11 +29,13 @@ class UserCrudController extends AbstractCrudController
         $this->passwordHasher = $passwordHasher;
     }
 
+    #[\Override]
     public static function getEntityFqcn(): string
     {
         return User::class;
     }
 
+    #[\Override]
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
@@ -40,6 +46,7 @@ class UserCrudController extends AbstractCrudController
             ->setPaginatorPageSize(20);
     }
 
+    #[\Override]
     public function configureFilters(Filters $filters): Filters
     {
         return $filters
@@ -53,23 +60,24 @@ class UserCrudController extends AbstractCrudController
                 ]));
     }
 
+    #[\Override]
     public function configureFields(string $pageName): iterable
     {
         yield IdField::new('id')->onlyOnIndex();
         yield EmailField::new('email', 'Email');
         yield TextField::new('phone', 'Телефон');
         yield TextField::new('name', 'Имя');
-        
+
         if (in_array($pageName, [Crud::PAGE_NEW, Crud::PAGE_EDIT])) {
             yield TextField::new('password', 'Пароль')
                 ->setFormType(PasswordType::class)
                 ->setRequired($pageName === Crud::PAGE_NEW)
                 ->onlyOnForms()
-                ->setHelp($pageName === Crud::PAGE_NEW 
-                    ? 'Введите пароль' 
+                ->setHelp($pageName === Crud::PAGE_NEW
+                    ? 'Введите пароль'
                     : 'Оставьте пустым если не нужно менять');
         }
-        
+
         yield ChoiceField::new('roles', 'Роли')
             ->setChoices([
                 'Пользователь' => 'ROLE_USER',
@@ -77,18 +85,20 @@ class UserCrudController extends AbstractCrudController
             ])
             ->allowMultipleChoices()
             ->renderExpanded();
-            
+
         yield DateTimeField::new('createdAt', 'Дата создания')
             ->onlyOnIndex()
             ->setFormTypeOption('disabled', true);
     }
 
+    #[\Override]
     public function persistEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         $this->encodePassword($entityInstance);
         parent::persistEntity($entityManager, $entityInstance);
     }
 
+    #[\Override]
     public function updateEntity(EntityManagerInterface $entityManager, $entityInstance): void
     {
         $this->encodePassword($entityInstance);
@@ -102,7 +112,7 @@ class UserCrudController extends AbstractCrudController
         }
 
         $plainPassword = $user->getPassword();
-        
+
         if ($plainPassword !== null && $plainPassword !== '') {
             $hashedPassword = $this->passwordHasher->hashPassword($user, $plainPassword);
             $user->setPassword($hashedPassword);

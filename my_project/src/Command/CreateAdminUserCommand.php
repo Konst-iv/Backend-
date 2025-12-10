@@ -1,14 +1,17 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Command;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use RuntimeException;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -25,6 +28,7 @@ class CreateAdminUserCommand extends Command
         parent::__construct();
     }
 
+    #[\Override]
     protected function configure(): void
     {
         $this
@@ -33,49 +37,54 @@ class CreateAdminUserCommand extends Command
             ->addArgument('name', InputArgument::OPTIONAL, 'Имя администратора');
     }
 
+    #[\Override]
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
         $io->title('Создание администратора');
 
-        // Получение данных через аргументы или интерактивно
         $email = $input->getArgument('email');
+
         if (!$email) {
             $email = $io->ask('Введите email администратора', null, function ($value) {
                 if (!filter_var($value, FILTER_VALIDATE_EMAIL)) {
-                    throw new \RuntimeException('Неверный формат email');
+                    throw new RuntimeException('Неверный формат email');
                 }
+
                 return $value;
             });
         }
 
         $phone = $input->getArgument('phone');
+
         if (!$phone) {
             $phone = $io->ask('Введите телефон (+7XXXXXXXXXX)', null, function ($value) {
                 if (!preg_match('/^\+7\d{10}$/', $value)) {
-                    throw new \RuntimeException('Телефон должен быть в формате +7XXXXXXXXXX');
+                    throw new RuntimeException('Телефон должен быть в формате +7XXXXXXXXXX');
                 }
+
                 return $value;
             });
         }
 
         $name = $input->getArgument('name');
+
         if (!$name) {
             $name = $io->ask('Введите имя администратора');
         }
 
         $password = $io->askHidden('Введите пароль', function ($value) {
             if (strlen($value) < 6) {
-                throw new \RuntimeException('Пароль должен содержать минимум 6 символов');
+                throw new RuntimeException('Пароль должен содержать минимум 6 символов');
             }
+
             return $value;
         });
 
-        // Проверка существования пользователя
         $existingUser = $this->entityManager->getRepository(User::class)
             ->findOneBy(['email' => $email]);
-        
+
         if ($existingUser) {
             $io->warning('Пользователь с таким email уже существует. Обновляю права...');
             $user = $existingUser;
@@ -86,10 +95,8 @@ class CreateAdminUserCommand extends Command
             $user->setName($name);
         }
 
-        // Установка роли администратора
         $user->setRoles(['ROLE_ADMIN']);
-        
-        // Хэширование пароля
+
         $hashedPassword = $this->passwordHasher->hashPassword($user, $password);
         $user->setPassword($hashedPassword);
 

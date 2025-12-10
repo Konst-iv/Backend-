@@ -1,27 +1,33 @@
 <?php
+
+declare(strict_types=1);
+
 namespace App\Controller\Admin;
 
 use App\Entity\House;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 use EasyCorp\Bundle\EasyAdminBundle\Config\Filters;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
+use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\IntegerField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\MoneyField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\BooleanField;
 use EasyCorp\Bundle\EasyAdminBundle\Field\TextareaField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\BooleanFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\NumericFilter;
 use EasyCorp\Bundle\EasyAdminBundle\Filter\TextFilter;
 
+/** @extends AbstractCrudController<House> */
 class HouseCrudController extends AbstractCrudController
 {
+    #[\Override]
     public static function getEntityFqcn(): string
     {
         return House::class;
     }
 
+    #[\Override]
     public function configureCrud(Crud $crud): Crud
     {
         return $crud
@@ -32,6 +38,7 @@ class HouseCrudController extends AbstractCrudController
             ->setPaginatorPageSize(20);
     }
 
+    #[\Override]
     public function configureFilters(Filters $filters): Filters
     {
         return $filters
@@ -42,7 +49,8 @@ class HouseCrudController extends AbstractCrudController
             ->add(NumericFilter::new('pricePerNight', 'Цена за ночь'));
     }
 
-    public function configureFields(string $pageName): iterable
+    #[\Override]
+    public function configureFields(string $_pageName): iterable
     {
         yield IdField::new('id')->onlyOnIndex();
         yield TextField::new('name', 'Название');

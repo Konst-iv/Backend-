@@ -6,6 +6,7 @@ namespace App\Tests\Controller;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Override;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -15,7 +16,7 @@ class AuthControllerTest extends WebTestCase
     private $entityManager;
     private $passwordHasher;
 
-    #[\Override]
+    #[Override]
     protected function setUp(): void
     {
         $this->client = static::createClient();
@@ -367,7 +368,7 @@ class AuthControllerTest extends WebTestCase
         $this->assertEquals('Successfully logged out', $data['message']);
     }
 
-    #[\Override]
+    #[Override]
     protected function tearDown(): void
     {
         parent::tearDown();

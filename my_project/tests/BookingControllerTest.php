@@ -6,6 +6,9 @@ namespace App\Tests;
 
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
+use Override;
+use RuntimeException;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -15,7 +18,7 @@ class BookingControllerTest extends WebTestCase
     private ?EntityManagerInterface $entityManager;
     private UserPasswordHasherInterface $passwordHasher;
 
-    #[\Override]
+    #[Override]
     protected function setUp(): void
     {
         $this->client = static::createClient();
@@ -55,7 +58,7 @@ class BookingControllerTest extends WebTestCase
 
         // Добавим проверку успешности логина
         if (!$loginResponse['success'] || !isset($loginResponse['data']['token'])) {
-            throw new \RuntimeException('Failed to authenticate user: ' . ($loginResponse['error'] ?? 'Unknown error'));
+            throw new RuntimeException('Failed to authenticate user: ' . ($loginResponse['error'] ?? 'Unknown error'));
         }
 
         return [
@@ -267,7 +270,7 @@ class BookingControllerTest extends WebTestCase
         }
     }
 
-    #[\Override]
+    #[Override]
     protected function tearDown(): void
     {
         parent::tearDown();
@@ -278,8 +281,8 @@ class BookingControllerTest extends WebTestCase
             try {
                 $connection->executeStatement('DELETE FROM bookings');
                 $connection->executeStatement('DELETE FROM users');
-            } catch (\Exception $e) {
-                 error_log('Cleanup error: ' . $e->getMessage());
+            } catch (Exception $e) {
+                error_log('Cleanup error: ' . $e->getMessage());
             }
 
             $this->entityManager->close();

@@ -7,6 +7,7 @@ namespace App\Security;
 use App\Entity\User;
 use App\Repository\UserRepository;
 use Exception;
+use Override;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -25,7 +26,7 @@ class JwtAuthenticator extends AbstractAuthenticator implements AuthenticationEn
     {
     }
 
-    #[\Override]
+    #[Override]
     public function start(Request $request, AuthenticationException $authException = null): Response
     {
         $message = $authException ? $authException->getMessage() : 'Authentication required';
@@ -36,14 +37,15 @@ class JwtAuthenticator extends AbstractAuthenticator implements AuthenticationEn
         ], Response::HTTP_UNAUTHORIZED);
     }
 
-    #[\Override]
+    #[Override]
     public function supports(Request $request): ?bool
     {
         $authHeader = $request->headers->get('Authorization');
+
         return $authHeader !== null && str_starts_with($authHeader, 'Bearer ');
     }
 
-    #[\Override]
+    #[Override]
     public function authenticate(Request $request): Passport
     {
         $authorizationHeader = $request->headers->get('Authorization');
@@ -87,20 +89,21 @@ class JwtAuthenticator extends AbstractAuthenticator implements AuthenticationEn
             }
 
             $user = $this->userRepository->findOneBy(['phone' => $payload['phone']]);
+
             return $user instanceof User ? $user : null;
         } catch (Exception $e) {
             return null;
         }
     }
 
-    #[\Override]
+    #[Override]
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?Response
     {
         // Authentication successful - allow the request to continue
         return null;
     }
 
-    #[\Override]
+    #[Override]
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception): Response
     {
 
