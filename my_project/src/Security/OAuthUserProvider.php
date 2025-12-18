@@ -34,7 +34,7 @@ class OAuthUserProvider implements UserProviderInterface, OAuthAwareUserProvider
         $logData = sprintf(
             "[%s] Данные от Яндекса: Email: %s, ID: %s, RawData: %s\n",
             date('Y-m-d H:i:s'),
-            $response->getEmail()?? 'no-email',
+            $response->getEmail() ?? 'no-email',
             $response->getUserIdentifier(),
             json_encode($response->getData(), JSON_UNESCAPED_UNICODE)
         );
