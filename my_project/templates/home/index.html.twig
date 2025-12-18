@@ -1,0 +1,45 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Главная | Booking System{% endblock %}
+
+{% block body %}
+<div class="container mt-5">
+    <div class="text-center py-5">
+        <h1 class="display-4 mb-4">Добро пожаловать в Booking System</h1>
+        <p class="lead mb-4">Бронируйте лучшие дома для отдыха у моря</p>
+        
+        {% if app.user %}
+            <div class="alert alert-success col-md-8 mx-auto">
+                <h5><i class="bi bi-check-circle me-2"></i>Вы успешно авторизованы!</h5>
+                <p class="mb-1">Имя: <strong>{{ app.user.name }}</strong></p>
+                <p class="mb-1">Email: <strong>{{ app.user.email }}</strong></p>
+                {% if app.user.isOAuthUser() %}
+                    <p class="mb-0 text-muted">
+                        <small>Авторизация через {{ app.user.getOauthProviderName() }}</small>
+                    </p>
+                {% endif %}
+            </div>
+            
+            <div class="mt-4">
+                {% if is_granted('ROLE_ADMIN') %}
+                    <a href="{{ path('admin') }}" class="btn btn-primary btn-lg me-3">
+                        <i class="bi bi-speedometer2 me-2"></i>Панель управления
+                    </a>
+                {% endif %}
+                <a href="{{ path('app_logout') }}" class="btn btn-outline-secondary btn-lg">
+                    <i class="bi bi-box-arrow-right me-2"></i>Выйти
+                </a>
+            </div>
+        {% else %}
+            <div class="mt-4">
+                <a href="{{ path('app_login') }}" class="btn btn-primary btn-lg me-3">
+                    <i class="bi bi-box-arrow-in-right me-2"></i>Войти
+                </a>
+                <a href="#" class="btn btn-outline-primary btn-lg">
+                    <i class="bi bi-person-plus me-2"></i>Регистрация
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

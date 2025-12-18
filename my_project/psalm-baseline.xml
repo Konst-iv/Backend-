@@ -20,6 +20,14 @@
       <code><![CDATA[JwtAuthenticator]]></code>
     </UnusedClass>
   </file>
+  <file src="src/Security/OAuthUserProvider.php">
+    <MissingOverrideAttribute>
+      <code><![CDATA[public function loadUserByOAuthUserResponse(UserResponseInterface $response): UserInterface]]></code>
+    </MissingOverrideAttribute>
+    <PossiblyFalseArgument>
+      <code><![CDATA[json_encode($response->getData(), JSON_UNESCAPED_UNICODE)]]></code>
+    </PossiblyFalseArgument>
+  </file>
   <file src="src/Service/UserService.php">
     <PossiblyUnusedMethod>
       <code><![CDATA[__construct]]></code>

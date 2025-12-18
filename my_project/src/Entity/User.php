@@ -42,7 +42,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180, unique: true)]
     private ?string $email = null;
 
-    #[ORM\Column(length: 20, unique: true)]
+    #[ORM\Column(length: 20, unique: true, nullable: true)]
     private ?string $phone = null;
 
     #[ORM\Column(length: 255)]
@@ -58,6 +58,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?DateTimeImmutable $createdAt = null;
 
     #[ORM\OneToMany(mappedBy: 'customer', targetEntity: Booking::class)]
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $oauthProvider = null;  // 'yandex'
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $oauthId = null;  // ID пользователя в Яндексе
+
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $avatar = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $oauthAccessToken = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $oauthRefreshToken = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?DateTimeImmutable $oauthTokenExpires = null;
     private Collection $bookings;
 
     public function __construct()
@@ -65,6 +83,93 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->createdAt = new DateTimeImmutable();
         $this->bookings = new ArrayCollection();
         $this->roles = ['ROLE_USER'];
+    }
+
+    public function getOauthProvider(): ?string
+    {
+        return $this->oauthProvider;
+    }
+
+    public function setOauthProvider(?string $oauthProvider): static
+    {
+        $this->oauthProvider = $oauthProvider;
+
+        return $this;
+    }
+
+    public function getOauthId(): ?string
+    {
+        return $this->oauthId;
+    }
+
+    public function setOauthId(?string $oauthId): static
+    {
+        $this->oauthId = $oauthId;
+
+        return $this;
+    }
+
+    public function getAvatar(): ?string
+    {
+        return $this->avatar;
+    }
+
+    public function setAvatar(?string $avatar): static
+    {
+        $this->avatar = $avatar;
+
+        return $this;
+    }
+
+    public function getOauthAccessToken(): ?string
+    {
+        return $this->oauthAccessToken;
+    }
+
+    public function setOauthAccessToken(?string $oauthAccessToken): static
+    {
+        $this->oauthAccessToken = $oauthAccessToken;
+
+        return $this;
+    }
+
+    public function getOauthRefreshToken(): ?string
+    {
+        return $this->oauthRefreshToken;
+    }
+
+    public function setOauthRefreshToken(?string $oauthRefreshToken): static
+    {
+        $this->oauthRefreshToken = $oauthRefreshToken;
+
+        return $this;
+    }
+
+    public function getOauthTokenExpires(): ?DateTimeImmutable
+    {
+        return $this->oauthTokenExpires;
+    }
+
+    public function setOauthTokenExpires(?DateTimeImmutable $oauthTokenExpires): static
+    {
+        $this->oauthTokenExpires = $oauthTokenExpires;
+
+        return $this;
+    }
+
+    // Метод для проверки, авторизован ли через OAuth
+    public function isOAuthUser(): bool
+    {
+        return $this->oauthProvider !== null && $this->oauthId !== null;
+    }
+
+    // Метод для получения имени провайдера
+    public function getOauthProviderName(): ?string
+    {
+        return match ($this->oauthProvider) {
+            'yandex' => 'Яндекс',
+            default => $this->oauthProvider
+        };
     }
 
     public function getId(): ?int
@@ -180,7 +285,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[Override]
     public function getUserIdentifier(): string
     {
-        return (string) $this->phone;
+        return (string) $this->email;
     }
 
     #[Override]

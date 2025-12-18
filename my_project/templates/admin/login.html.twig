@@ -1,69 +1,35 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Вход в админ-панель{% endblock %}
+{% block title %}Вход | Booking System{% endblock %}
 
 {% block body %}
-<div class="container mt-5">
-    <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="text-center">Вход в админ-панель</h3>
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white text-center py-3">
+                <h4 class="mb-0">Вход в систему</h4>
+            </div>
+            <div class="card-body p-4 text-center">
+                <!-- Кнопка Яндекс OAuth -->
+                <div class="mb-4">
+                    <a href="{{ path('hwi_oauth_service_redirect', {'service': 'yandex'}) }}" 
+                       class="btn btn-lg w-100" 
+                       style="background-color: #FFCC00; color: #000; border-color: #FFCC00;">
+                        <i class="bi bi-yandex me-2"></i> Войти через Яндекс
+                    </a>
                 </div>
-                <div class="card-body">
-                    {% if error %}
-                        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-                    {% endif %}
 
-                    <form method="post">
-                        <div class="mb-3">
-                            <label for="username" class="form-label">Телефон</label>
-                            <input type="text" value="{{ last_username }}" name="_username" id="username" 
-                                   class="form-control" autocomplete="username" required autofocus
-                                   placeholder="+7XXXXXXXXXX">
-                        </div>
-                        <div class="mb-3">
-                            <label for="password" class="form-label">Пароль</label>
-                            <input type="password" name="_password" id="password" 
-                                   class="form-control" autocomplete="current-password" required>
-                        </div>
-                        
-                        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
-                        
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Войти</button>
-                        </div>
-                    </form>
-                </div>
-                <div class="card-footer text-center">
-                    <small>Доступ только для администраторов</small>
-                </div>
+                <hr class="my-4">
+
+                <p class="text-muted">
+                    Для входа в систему используйте авторизацию через Яндекс.
+                </p>
+                
+                <p class="text-muted small mt-3">
+                    Для доступа в админ-панель обратитесь к администратору.
+                </p>
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
-
-{% block stylesheets %}
-<style>
-    body {
-        background-color: #f8f9fa;
-    }
-    .card {
-        border: none;
-        border-radius: 10px;
-        box-shadow: 0 0 20px rgba(0,0,0,0.1);
-    }
-    .card-header {
-        background-color: #007bff;
-        color: white;
-        border-radius: 10px 10px 0 0 !important;
-    }
-    .btn-primary {
-        background-color: #007bff;
-        border-color: #007bff;
-        padding: 10px;
-        border-radius: 5px;
-    }
-</style>
 {% endblock %}
