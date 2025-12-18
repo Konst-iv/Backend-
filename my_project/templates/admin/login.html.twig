@@ -1,0 +1,35 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Вход | Booking System{% endblock %}
+
+{% block body %}
+<div class="row justify-content-center mt-5">
+    <div class="col-md-6 col-lg-4">
+        <div class="card shadow">
+            <div class="card-header bg-primary text-white text-center py-3">
+                <h4 class="mb-0">Вход в систему</h4>
+            </div>
+            <div class="card-body p-4 text-center">
+                <!-- Кнопка Яндекс OAuth -->
+                <div class="mb-4">
+                    <a href="{{ path('hwi_oauth_service_redirect', {'service': 'yandex'}) }}" 
+                       class="btn btn-lg w-100" 
+                       style="background-color: #FFCC00; color: #000; border-color: #FFCC00;">
+                        <i class="bi bi-yandex me-2"></i> Войти через Яндекс
+                    </a>
+                </div>
+
+                <hr class="my-4">
+
+                <p class="text-muted">
+                    Для входа в систему используйте авторизацию через Яндекс.
+                </p>
+                
+                <p class="text-muted small mt-3">
+                    Для доступа в админ-панель обратитесь к администратору.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

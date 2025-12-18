@@ -1,0 +1,295 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Entity;
+
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
+use App\Controller\UserController;
+use DateTimeImmutable;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+use Override;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
+
+#[ORM\Entity]
+#[ORM\Table(name: 'users')]
+#[ApiResource(
+    operations: [
+        new Post(
+            uriTemplate: '/users',
+            controller: UserController::class . '::createUser',
+            description: 'Create new user'
+        ),
+        new Get(
+            uriTemplate: '/users/{id}',
+            controller: UserController::class . '::getUserById',
+            description: 'Get user by ID'
+        )
+    ]
+)]
+class User implements UserInterface, PasswordAuthenticatedUserInterface
+{
+    #[ORM\Id]
+    #[ORM\GeneratedValue]
+    #[ORM\Column]
+    private ?int $id = null;
+
+    #[ORM\Column(length: 180, unique: true)]
+    private ?string $email = null;
+
+    #[ORM\Column(length: 20, unique: true, nullable: true)]
+    private ?string $phone = null;
+
+    #[ORM\Column(length: 255)]
+    private ?string $name = null;
+
+    #[ORM\Column]
+    private ?string $password = null;
+
+    #[ORM\Column(type: 'json')]
+    private array $roles = [];
+
+    #[ORM\Column]
+    private ?DateTimeImmutable $createdAt = null;
+
+    #[ORM\OneToMany(mappedBy: 'customer', targetEntity: Booking::class)]
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $oauthProvider = null;  // 'yandex'
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $oauthId = null;  // ID пользователя в Яндексе
+
+    #[ORM\Column(length: 500, nullable: true)]
+    private ?string $avatar = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $oauthAccessToken = null;
+
+    #[ORM\Column(type: 'text', nullable: true)]
+    private ?string $oauthRefreshToken = null;
+
+    #[ORM\Column(nullable: true)]
+    private ?DateTimeImmutable $oauthTokenExpires = null;
+    private Collection $bookings;
+
+    public function __construct()
+    {
+        $this->createdAt = new DateTimeImmutable();
+        $this->bookings = new ArrayCollection();
+        $this->roles = ['ROLE_USER'];
+    }
+
+    public function getOauthProvider(): ?string
+    {
+        return $this->oauthProvider;
+    }
+
+    public function setOauthProvider(?string $oauthProvider): static
+    {
+        $this->oauthProvider = $oauthProvider;
+
+        return $this;
+    }
+
+    public function getOauthId(): ?string
+    {
+        return $this->oauthId;
+    }
+
+    public function setOauthId(?string $oauthId): static
+    {
+        $this->oauthId = $oauthId;
+
+        return $this;
+    }
+
+    public function getAvatar(): ?string
+    {
+        return $this->avatar;
+    }
+
+    public function setAvatar(?string $avatar): static
+    {
+        $this->avatar = $avatar;
+
+        return $this;
+    }
+
+    public function getOauthAccessToken(): ?string
+    {
+        return $this->oauthAccessToken;
+    }
+
+    public function setOauthAccessToken(?string $oauthAccessToken): static
+    {
+        $this->oauthAccessToken = $oauthAccessToken;
+
+        return $this;
+    }
+
+    public function getOauthRefreshToken(): ?string
+    {
+        return $this->oauthRefreshToken;
+    }
+
+    public function setOauthRefreshToken(?string $oauthRefreshToken): static
+    {
+        $this->oauthRefreshToken = $oauthRefreshToken;
+
+        return $this;
+    }
+
+    public function getOauthTokenExpires(): ?DateTimeImmutable
+    {
+        return $this->oauthTokenExpires;
+    }
+
+    public function setOauthTokenExpires(?DateTimeImmutable $oauthTokenExpires): static
+    {
+        $this->oauthTokenExpires = $oauthTokenExpires;
+
+        return $this;
+    }
+
+    // Метод для проверки, авторизован ли через OAuth
+    public function isOAuthUser(): bool
+    {
+        return $this->oauthProvider !== null && $this->oauthId !== null;
+    }
+
+    // Метод для получения имени провайдера
+    public function getOauthProviderName(): ?string
+    {
+        return match ($this->oauthProvider) {
+            'yandex' => 'Яндекс',
+            default => $this->oauthProvider
+        };
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function __toString(): string
+    {
+        return $this->name . ' (' . $this->email . ')';
+    }
+
+    public function getEmail(): ?string
+    {
+        return $this->email;
+    }
+
+    public function setEmail(string $email): static
+    {
+        $this->email = $email;
+
+        return $this;
+    }
+
+    public function getPhone(): ?string
+    {
+        return $this->phone;
+    }
+
+    public function setPhone(string $phone): static
+    {
+        $this->phone = $phone;
+
+        return $this;
+    }
+
+    public function getName(): ?string
+    {
+        return $this->name;
+    }
+
+    public function setName(string $name): static
+    {
+        $this->name = $name;
+
+        return $this;
+    }
+
+    #[Override]
+    public function getPassword(): ?string
+    {
+        return $this->password;
+    }
+
+    public function setPassword(string $password): static
+    {
+        $this->password = $password;
+
+        return $this;
+    }
+
+    #[Override]
+    public function getRoles(): array
+    {
+        $roles = $this->roles;
+        $roles[] = 'ROLE_USER';
+
+        return array_unique($roles);
+    }
+
+    public function setRoles(array $roles): static
+    {
+        $this->roles = $roles;
+
+        return $this;
+    }
+
+    public function getCreatedAt(): ?DateTimeImmutable
+    {
+        return $this->createdAt;
+    }
+
+    /**
+     * @return Collection<int, Booking>
+     */
+    public function getBookings(): Collection
+    {
+        return $this->bookings;
+    }
+
+    public function addBooking(Booking $booking): static
+    {
+        if (!$this->bookings->contains($booking)) {
+            $this->bookings->add($booking);
+            $booking->setCustomer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeBooking(Booking $booking): static
+    {
+        if ($this->bookings->removeElement($booking)) {
+            // set the owning side to null (unless already changed)
+            if ($booking->getCustomer() === $this) {
+                $booking->setCustomer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    #[Override]
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    #[Override]
+    public function eraseCredentials(): void
+    {
+    }
+}
