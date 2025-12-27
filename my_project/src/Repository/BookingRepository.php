@@ -2,7 +2,7 @@
 
 namespace App\Repository;
 
-use App\Entity\Booking;  // 👈 Исправить на Entity
+use App\Entity\Booking;  
 
 class BookingRepository
 {
@@ -19,7 +19,7 @@ class BookingRepository
         if (!file_exists($this->csvFile)) {
             $dir = dirname($this->csvFile);
             if (!is_dir($dir)) {
-                mkdir($dir, 0777, true);  // 👈 Исправить права 0777
+                mkdir($dir, 0777, true);  
             }
             
             $handle = fopen($this->csvFile, "w");
@@ -44,18 +44,18 @@ class BookingRepository
     
     public function findAll(): array
     {
-        if (!file_exists($this->csvFile)) {  // 👈 Исправить условие
+        if (!file_exists($this->csvFile)) {  
             return [];
         }
 
         $bookings = [];
-        $handle = fopen($this->csvFile, 'r');  // 👈 Убрать лишний $
+        $handle = fopen($this->csvFile, 'r'); 
         
         // Пропускаем заголовок
         fgetcsv($handle);
 
         while (($data = fgetcsv($handle)) !== false) {
-            if (count($data) >= 6) {  // 👈 Исправить условие (>= 6 вместо > 6)
+            if (count($data) >= 6) {  
                 $bookings[] = new Booking(
                     (int)$data[0],
                     $data[1],

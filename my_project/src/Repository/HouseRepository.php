@@ -19,24 +19,30 @@ class HouseRepository
         if (!file_exists($this->csvFile)) {
             return [];
         }
-        
+
         $houses = [];
         $handle = fopen($this->csvFile, 'r');
-        
-        // Пропускаем заголовок
+
         fgetcsv($handle);
-        
+
         while (($data = fgetcsv($handle)) !== FALSE) {
+            $id            = (int)$data[0];
+            $name          = $data[1];
+            $beds          = (int)$data[2];
+            $amenities     = $data[3];
+            $distanceToSea = (int)$data[4];
+            $isAvailable   = (bool)$data[5];
+
             $houses[] = new House(
-                (int)$data[0],
-                $data[1],
-                (int)$data[2],
-                $data[3],
-                (int)$data[4],
-                (bool)$data[5]
+                id: $id,
+                name: $name,
+                beds: $beds,
+                amenities: $amenities,
+                distanceToSea: $distanceToSea,
+                isAvailable: $isAvailable
             );
         }
-        
+
         fclose($handle);
         return $houses;
     }

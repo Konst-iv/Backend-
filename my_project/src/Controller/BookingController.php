@@ -1,63 +1,63 @@
 <?php
 
-namespace App\Controller;   
-use App\Service\BookingService;
+namespace App\Controller;
 
-class BookingController
+use App\Service\BookingService;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+
+class BookingController extends AbstractController
 {
     private BookingService $bookingService;
-    
+
     public function __construct(BookingService $bookingService)
     {
         $this->bookingService = $bookingService;
     }
-    
-    public function getAvailableHouses(): string
+
+    public function getAvailableHouses(): JsonResponse
     {
         try {
             $houses = $this->bookingService->getAvailableHouses();
-            
-            $result = [];
-            foreach ($houses as $house) {
-                $result[] = [
-                    'id' => $house->id,
-                    'name' => $house->name,
-                    'beds' => $house->beds,
-                    'amenities' => $house->amenities,
-                    'distanceToSea' => $house->distanceToSea
-                ];
-            }
-            
-            header('Content-Type: application/json');
-            return json_encode(['success' => true, 'data' => $result]);
-            
+
+            $result = array_map(fn($house) => [
+                'id' => $house->id,
+                'name' => $house->name,
+                'beds' => $house->beds,
+                'amenities' => $house->amenities,
+                'distanceToSea' => $house->distanceToSea
+            ], $houses);
+
+            $responseData = ['success' => true, 'data' => $result];
         } catch (\Exception $e) {
-            header('Content-Type: application/json');
-            http_response_code(500);
-            return json_encode(['success' => false, 'error' => $e->getMessage()]);
+            throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, 'Internal Server Error');
         }
+
+        return new JsonResponse($responseData);
     }
-    
-    public function createBooking(): string
+
+    public function createBooking(Request $request): JsonResponse
     {
         try {
-            // Получаем данные из POST запроса
-            $input = json_decode(file_get_contents('php://input'), true);
-            
-            if (!isset($input['phone']) || !isset($input['houseId']) || !isset($input['comment'])) {
-                http_response_code(400);
-                return json_encode(['success' => false, 'error' => 'Missing required fields']);
+            $input = $request->toArray();
+
+            if (empty($input['phone']) || empty($input['houseId']) || empty($input['comment'])) {
+                throw new BadRequestHttpException('Missing required fields');
             }
-            
+
             $booking = $this->bookingService->createBooking(
                 $input['phone'],
                 (int)$input['houseId'],
                 $input['comment']
             );
-            
-            header('Content-Type: application/json');
-            return json_encode([
-                'success' => true, 
+
+            $responseData = [
+                'success' => true,
                 'data' => [
                     'id' => $booking->id,
                     'phone' => $booking->phone,
@@ -65,40 +65,38 @@ class BookingController
                     'comment' => $booking->comment,
                     'createdAt' => $booking->createdAt
                 ]
-            ]);
-            
+            ];
+        } catch (BadRequestHttpException $e) {
+            throw $e;
         } catch (\InvalidArgumentException $e) {
-            http_response_code(400);
-            return json_encode(['success' => false, 'error' => $e->getMessage()]);
+            throw new BadRequestHttpException($e->getMessage());
         } catch (\Exception $e) {
-            http_response_code(500);
-            return json_encode(['success' => false, 'error' => $e->getMessage()]);
+            throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
         }
+
+        return new JsonResponse($responseData, Response::HTTP_CREATED);
     }
-    
-    public function updateBooking(): string
+
+    public function updateBooking(Request $request): JsonResponse
     {
         try {
-            $input = json_decode(file_get_contents('php://input'), true);
-            
-            if (!isset($input['id']) || !isset($input['comment'])) {
-                http_response_code(400);
-                return json_encode(['success' => false, 'error' => 'Missing required fields']);
+            $input = $request->toArray();
+
+            if (empty($input['id']) || empty($input['comment'])) {
+                throw new BadRequestHttpException('Missing required fields');
             }
-            
+
             $booking = $this->bookingService->updateBookingComment(
                 (int)$input['id'],
                 $input['comment']
             );
-            
+
             if (!$booking) {
-                http_response_code(404);
-                return json_encode(['success' => false, 'error' => 'Booking not found']);
+                throw new NotFoundHttpException('Booking not found');
             }
-            
-            header('Content-Type: application/json');
-            return json_encode([
-                'success' => true, 
+
+            $responseData = [
+                'success' => true,
                 'data' => [
                     'id' => $booking->id,
                     'phone' => $booking->phone,
@@ -106,11 +104,13 @@ class BookingController
                     'comment' => $booking->comment,
                     'updatedAt' => $booking->updatedAt
                 ]
-            ]);
-            
+            ];
+        } catch (BadRequestHttpException | NotFoundHttpException $e) {
+            throw $e;
         } catch (\Exception $e) {
-            http_response_code(500);
-            return json_encode(['success' => false, 'error' => $e->getMessage()]);
+            throw new HttpException(Response::HTTP_INTERNAL_SERVER_ERROR, $e->getMessage());
         }
+
+        return new JsonResponse($responseData);
     }
 }
