@@ -26,145 +26,126 @@ class AuthController extends AbstractController
     #[Route('/api/auth/register', name: 'register', methods: ['POST'])]
     public function register(Request $request): JsonResponse
     {
-        try {
-            $data = json_decode($request->getContent(), true);
+        $data = json_decode($request->getContent(), true) ?? [];
+        $responseData = ['success' => false];
+        $statusCode = 400;
 
+        try {
             $requiredFields = ['email', 'phone', 'name', 'password'];
+            $missingField = null;
 
             foreach ($requiredFields as $field) {
-                if (!isset($data[$field])) {
-                    return $this->json([
-                        'success' => false,
-                        'error' => "Missing required field: $field"
-                    ], 400);
+                if (empty($data[$field])) {
+                    $missingField = $field;
+                    break;
                 }
             }
 
-            $user = $this->userService->createUser(
-                $data['email'],
-                $data['phone'],
-                $data['name'],
-                $data['password']
-            );
+            if ($missingField) {
+                $responseData['error'] = "Missing required field: $missingField";
+            } else {
+                $user = $this->userService->createUser(
+                    $data['email'],
+                    $data['phone'],
+                    $data['name'],
+                    $data['password']
+                );
 
-            $token = $this->generateJwtToken($user);
-
-            return $this->json([
-                'success' => true,
-                'data' => [
-                    'user' => [
-                        'id' => $user->getId(),
-                        'email' => $user->getEmail(),
-                        'phone' => $user->getPhone(),
-                        'name' => $user->getName(),
-                    ],
-                    'token' => $token
-                ]
-            ], 201);
+                $responseData = [
+                    'success' => true,
+                    'data' => [
+                        'user' => [
+                            'id' => $user->getId(),
+                            'email' => $user->getEmail(),
+                            'phone' => $user->getPhone(),
+                            'name' => $user->getName(),
+                        ],
+                        'token' => $this->userService->generateJwtToken($user)
+                    ]
+                ];
+                $statusCode = 201;
+            }
         } catch (InvalidArgumentException $e) {
-            return $this->json([
-                'success' => false,
-                'error' => $e->getMessage()
-            ], 400);
+            $responseData['error'] = $e->getMessage();
+            $statusCode = 400;
         } catch (Exception $e) {
-            return $this->json([
-                'success' => false,
-                'error' => 'Internal server error'
-            ], 500);
+            $responseData['error'] = 'Internal server error';
+            $statusCode = 500;
         }
+
+        return $this->json($responseData, $statusCode);
     }
 
     #[Route('/api/auth/login', name: 'login', methods: ['POST'])]
     public function login(Request $request): JsonResponse
     {
+        $data = json_decode($request->getContent(), true) ?? [];
+        $responseData = ['success' => false];
+        $statusCode = 400;
+
         try {
-            $data = json_decode($request->getContent(), true);
-
             if (!isset($data['phone']) || !isset($data['password'])) {
-                return $this->json([
-                    'success' => false,
-                    'error' => 'Missing required fields: phone, password'
-                ], 400);
+                $responseData['error'] = 'Missing required fields: phone, password';
+            } else {
+                $user = $this->userService->getUserByPhone($data['phone']);
+
+                if ($user && $this->passwordHasher->isPasswordValid($user, $data['password'])) {
+                    $responseData = [
+                        'success' => true,
+                        'data' => [
+                            'user' => [
+                                'id' => $user->getId(),
+                                'email' => $user->getEmail(),
+                                'phone' => $user->getPhone(),
+                                'name' => $user->getName(),
+                            ],
+                            'token' => $this->userService->generateJwtToken($user)
+                        ]
+                    ];
+                    $statusCode = 200;
+                } else {
+                    $responseData['error'] = 'Invalid credentials';
+                    $statusCode = 401;
+                }
             }
-
-            $user = $this->userService->getUserByPhone($data['phone']);
-
-            if (!$user || !$this->passwordHasher->isPasswordValid($user, $data['password'])) {
-                return $this->json([
-                    'success' => false,
-                    'error' => 'Invalid credentials'
-                ], 401);
-            }
-
-            $token = $this->generateJwtToken($user);
-
-            return $this->json([
-                'success' => true,
-                'data' => [
-                    'user' => [
-                        'id' => $user->getId(),
-                        'email' => $user->getEmail(),
-                        'phone' => $user->getPhone(),
-                        'name' => $user->getName(),
-                    ],
-                    'token' => $token
-                ]
-            ]);
         } catch (Exception $e) {
-            return $this->json([
-                'success' => false,
-                'error' => 'Internal server error'
-            ], 500);
+            $responseData['error'] = 'Internal server error';
+            $statusCode = 500;
         }
+
+        return $this->json($responseData, $statusCode);
     }
+
+    // Данные извлекаются автоматически из JWT-токена, переданного в заголовке Authorization.
+    // Слой безопасности Symfony (Firewall) расшифровывает токен до попадания в контроллер,
+    // находит пользователя в БД и передает объект через атрибут #[CurrentUser].
 
     #[Route('/api/auth/me', name: 'me', methods: ['GET'])]
     public function me(#[CurrentUser] ?User $user): JsonResponse
     {
-        if (!$user) {
-            return $this->json([
-                'success' => false,
-                'error' => 'Not authenticated'
-            ], 401);
+        $responseData = ['success' => false, 'error' => 'Not authenticated'];
+        $statusCode = 401;
+
+        if ($user) {
+            $responseData = [
+                'success' => true,
+                'data' => [
+                    'id' => $user->getId(),
+                    'email' => $user->getEmail(),
+                    'phone' => $user->getPhone(),
+                    'name' => $user->getName(),
+                    'roles' => $user->getRoles(),
+                ]
+            ];
+            $statusCode = 200;
         }
 
-        return $this->json([
-            'success' => true,
-            'data' => [
-                'id' => $user->getId(),
-                'email' => $user->getEmail(),
-                'phone' => $user->getPhone(),
-                'name' => $user->getName(),
-                'roles' => $user->getRoles(),
-            ]
-        ]);
+        return $this->json($responseData, $statusCode);
     }
 
     #[Route('/api/auth/logout', name: 'logout', methods: ['POST'])]
     public function logout(): JsonResponse
     {
-        return $this->json([
-            'success' => true,
-            'message' => 'Successfully logged out'
-        ]);
-    }
-
-    private function generateJwtToken(User $user): string
-    {
-        $header = json_encode(['typ' => 'JWT', 'alg' => 'HS256']);
-        $payload = json_encode([
-            'phone' => $user->getPhone(),
-            'exp' => time() + 3600,
-            'iat' => time(),
-            'sub' => $user->getId()
-        ]);
-
-        $base64UrlHeader = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($header ?: ''));
-        $base64UrlPayload = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($payload ?: ''));
-
-        $signature = hash_hmac('sha256', $base64UrlHeader . '.' . $base64UrlPayload, 'your-secret-key', true);
-        $base64UrlSignature = str_replace(['+', '/', '='], ['-', '_', ''], base64_encode($signature));
-
-        return $base64UrlHeader . '.' . $base64UrlPayload . '.' . $base64UrlSignature;
+        return $this->json(['success' => true, 'message' => 'Successfully logged out']);
     }
 }
