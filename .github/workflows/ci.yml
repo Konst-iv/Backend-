@@ -1,0 +1,115 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ main, dz_5 ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: booking_db
+          POSTGRES_USER: user  
+          POSTGRES_PASSWORD: password
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: mbstring, xml, ctype, iconv, intl, pdo_pgsql
+        coverage: none
+
+    - name: Install dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
+      working-directory: my_project  
+
+    - name: Setup test environment for GitHub Actions
+      run: |
+        echo "APP_ENV=test" > .env.test
+        echo "APP_SECRET=test_secret_key_for_testing_only" >> .env.test
+        echo "APP_DEBUG=true" >> .env.test
+        echo 'DATABASE_URL="postgresql://user:password@localhost:5432/booking_db?serverVersion=17&charset=utf8"' >> .env.test
+        echo 'MAILER_DSN=null://null' >> .env.test
+        echo 'MESSENGER_TRANSPORT_DSN=doctrine://default' >> .env.test
+      working-directory: my_project  
+
+    - name: Wait for PostgreSQL
+      run: sleep 10
+
+    - name: Create test database
+      run: php bin/console doctrine:database:create --env=test
+      working-directory: my_project  # ← И ВО ВСЕХ ОСТАЛЬНЫХ ШАГАХ
+
+    - name: Run migrations for tests
+      run: php bin/console doctrine:migrations:migrate --env=test --no-interaction
+      working-directory: my_project
+
+    - name: Clear test cache
+      run: php bin/console cache:clear --env=test
+      working-directory: my_project
+
+    - name: Run unit tests
+      run: vendor/bin/phpunit --testsuite=unit --no-coverage
+      working-directory: my_project
+
+    - name: Run integration tests
+      run: vendor/bin/phpunit tests/Controller/ tests/BookingControllerTest.php --no-coverage
+      working-directory: my_project
+
+    - name: Run authentication tests
+      run: vendor/bin/phpunit tests/Controller/AuthControllerTest.php --no-coverage
+      working-directory: my_project
+
+  code-quality:
+    name: Code Quality Checks
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: '8.3'
+        extensions: mbstring, xml, ctype, iconv, intl
+        coverage: none
+
+    - name: Install project dependencies
+      run: composer install --prefer-dist --no-progress --no-interaction
+      working-directory: my_project  
+    - name: Run PHP Code Sniffer
+      run: ./vendor/bin/phpcs --standard=PSR12 src/ tests/
+      working-directory: my_project
+
+    - name: Run Psalm with baseline
+      run: |
+        ./vendor/bin/psalm --set-baseline=psalm-baseline.xml
+        ./vendor/bin/psalm --use-baseline=psalm-baseline.xml --output-format=github
+      working-directory: my_project
+
+    - name: Validate Symfony configuration
+      run: php bin/console debug:container --env=test
+      working-directory: my_project
+
+    - name: Check routing
+      run: php bin/console debug:router --env=test
+      working-directory: my_project
