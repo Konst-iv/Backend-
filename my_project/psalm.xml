@@ -25,4 +25,21 @@
             <file name="importmap.php" />
         </ignoreFiles>
     </projectFiles>
+
+    <issueHandlers>
+        <UnusedClass>
+            <errorLevel type="suppress">
+                <directory name="src/Repository"/>
+                <directory name="src/Controller"/>
+            </errorLevel>
+        </UnusedClass>
+
+        <PossiblyUnusedMethod>
+            <errorLevel type="suppress">
+                <directory name="src/Entity"/>
+                <directory name="src/Repository"/>
+                <directory name="src/Controller" />
+            </errorLevel>
+        </PossiblyUnusedMethod>
+    </issueHandlers>
 </psalm>

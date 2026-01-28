@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Entity;
 
+use App\Controller\UserController;
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\Post;
 use DateTimeImmutable;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -13,6 +17,20 @@ use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'users')]
+#[ApiResource(
+    operations: [
+        new Post(
+            uriTemplate: '/users',
+            controller: UserController::class . '::createUser',
+            description: 'Create new user'
+        ),
+        new Get(
+            uriTemplate: '/users/{id}',
+            controller: UserController::class . '::getUserById',
+            description: 'Get user by ID'
+        )
+    ]
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]

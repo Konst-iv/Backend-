@@ -5,60 +5,17 @@
       <code><![CDATA[AddTestHousesCommand]]></code>
     </UnusedClass>
   </file>
-  <file src="src/Controller/AuthController.php">
-    <UnusedClass>
-      <code><![CDATA[AuthController]]></code>
-    </UnusedClass>
-  </file>
-  <file src="src/Controller/BookingController.php">
-    <UnusedClass>
-      <code><![CDATA[BookingController]]></code>
-    </UnusedClass>
-  </file>
-  <file src="src/Controller/UserController.php">
-    <UnusedClass>
-      <code><![CDATA[UserController]]></code>
-    </UnusedClass>
-  </file>
-  <file src="src/Entity/House.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[addBooking]]></code>
-      <code><![CDATA[getAmenities]]></code>
-      <code><![CDATA[getBeds]]></code>
-      <code><![CDATA[getBookings]]></code>
-      <code><![CDATA[getDistanceToSea]]></code>
-      <code><![CDATA[getPricePerNight]]></code>
-      <code><![CDATA[removeBooking]]></code>
-    </PossiblyUnusedMethod>
-  </file>
-  <file src="src/Entity/User.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[addBooking]]></code>
-      <code><![CDATA[getBookings]]></code>
-      <code><![CDATA[removeBooking]]></code>
-      <code><![CDATA[setRoles]]></code>
-    </PossiblyUnusedMethod>
-  </file>
   <file src="src/Repository/BookingRepository.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
     <PossiblyUnusedParam>
       <code><![CDATA[$registry]]></code>
     </PossiblyUnusedParam>
   </file>
   <file src="src/Repository/HouseRepository.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
     <PossiblyUnusedParam>
       <code><![CDATA[$registry]]></code>
     </PossiblyUnusedParam>
   </file>
   <file src="src/Repository/UserRepository.php">
-    <PossiblyUnusedMethod>
-      <code><![CDATA[__construct]]></code>
-    </PossiblyUnusedMethod>
     <PossiblyUnusedParam>
       <code><![CDATA[$registry]]></code>
     </PossiblyUnusedParam>
